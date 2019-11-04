@@ -1,0 +1,21 @@
+Package: untitled_singlecell
+Title: Single-Cell RNA-seq Methods from the Rafalab
+Version: 0.0.1
+Description: This package incorporates several analysis methods developed
+            by members of the Irizarry lab.
+Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
+            role = c("aut", "cre", "cph")),
+            person("Kelly", "Street", email = "street.kelly@gmail.com", role="aut"),
+            person("Isabella", "Grabski", email = "isabellagrabski@g.harvard.edu", role="aut"))
+License: Artistic-2.0
+Depends:
+    R (>= 3.6),
+    stats
+Imports:
+Suggests:
+    knitr,
+    testthat,
+    covr
+VignetteBuilder: knitr
+LazyData: false
+BugReports: https://github.com/kstreet/untitled_singlecell/issues
