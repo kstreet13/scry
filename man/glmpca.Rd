@@ -3,17 +3,11 @@
 \docType{methods}
 \name{GLMPCA}
 \alias{GLMPCA}
-\alias{GLMPCA,SingleCellExperiment-method}
 \alias{GLMPCA,SummarizedExperiment-method}
 \alias{GLMPCA,matrix-method}
 \title{GLM-PCA}
 \usage{
 GLMPCA(object, ...)
-
-\S4method{GLMPCA}{SingleCellExperiment}(object, assay = 1, L,
-  fam = c("poi", "nb", "mult", "bern"), ctl = list(maxIter = 1000, eps
-  = 1e-04), penalty = 1, verbose = FALSE, init = list(factors = NULL,
-  loadings = NULL), nb_theta = 1, X = NULL, Z = NULL, sz = NULL)
 
 \S4method{GLMPCA}{SummarizedExperiment}(object, assay = 1, L,
   fam = c("poi", "nb", "mult", "bern"), ctl = list(maxIter = 1000, eps
