@@ -1,4 +1,4 @@
-Package: untitled_singlecell
+Package: untitledsinglecell
 Title: Single-Cell RNA-seq Methods from the Rafalab
 Version: 0.0.1
 Description: This package incorporates several analysis methods developed
@@ -19,3 +19,4 @@ Suggests:
 VignetteBuilder: knitr
 LazyData: false
 BugReports: https://github.com/kstreet/untitled_singlecell/issues
+RoxygenNote: 6.1.1
