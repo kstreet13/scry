@@ -12,6 +12,8 @@ Depends:
     R (>= 3.6),
     stats
 Imports:
+    glmpca,
+    SingleCellExperiment
 Suggests:
     knitr,
     testthat,

@@ -6,6 +6,7 @@ test_that("glmpca works with intended input types", {
 	u <- matrix(rpois(2000, 5), ncol=ncells)
 	v <- log2(u + 1)
 	
+	require(SingleCellExperiment)
 	se <- SummarizedExperiment(assays=list(counts=u, logcounts=v))
 	sce <- SingleCellExperiment(assays=list(counts=u, logcounts=v))
 	

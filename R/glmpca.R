@@ -77,7 +77,7 @@ setMethod(f = "GLMPCA",
 		  					  init = list(factors=NULL, loadings=NULL),
 		  					  nb_theta = 1, X = NULL, Z = NULL, sz = NULL){
 		  	
-		  	res <- glmpca(Y = assay(object, assay),
+		  	res <- glmpca(Y = object,
 		  				  L = L, fam = fam, ctl = ctl, penalty = penalty,
 		  				  verbose = verbose, init = init, nb_theta = nb_theta,
 		  				  X = X, Z = Z, sz = sz)
