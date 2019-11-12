@@ -1,34 +1,25 @@
-context("Test glmpca and related functions.")
-# this is where it would be helpful to have a very small example dataset so
-# that we know the correct answer
-# data("glmpcaMiniExample")
+context("Test GLMPCA")
 set.seed(1234)
 
 test_that("glmpca works with intended input types", {
-	Y <- matrix(rnbinom(50, 4, .8), ncol = 5)
+	ncells <- 100
+	u <- matrix(rpois(2000, 5), ncol=ncells)
+	v <- log2(u + 1)
 	
-	g1 <- glmpca(Y, L=2, fam = "poi")
-	expect_is(g1, "list")
-	expect_equal(dim(g1$factors), c(5,2))
-	expect_equal(dim(g1$loadings), c(10,2))
-	expect_is(g1$dev, "numeric")
-	expect_is(g1$family, "glmpca_family")
+	se <- SummarizedExperiment(assays=list(counts=u, logcounts=v))
+	sce <- SingleCellExperiment(assays=list(counts=u, logcounts=v))
 	
-	# try out different arguments, make sure it still runs
-	g1 <- glmpca(Y, L=2, fam = "nb", verbose = TRUE, X = matrix(1:5, ncol=1),
-				 Z = matrix(1:10, ncol=1))
-	g1 <- glmpca(Y, L=2, fam = "mult", sz = 1:5)
-	f0 <- matrix(rnorm(10)/10, ncol=2)
-	l0 <- matrix(rnorm(20)/10, ncol=2)
-	g1 <- glmpca(Y, L=2, init = list(factors = f0, loadings = l0))
-	Y[Y > 0] <- 1
-	g1 <- glmpca(Y, L=2, fam = "bern")
+	outSE <- GLMPCA(se, L = 2, fam = "poi")
+	
+	expect_is(metadata(outSE)$glmpca, "list")
+	expect_equal(names(metadata(outSE)$glmpca),
+				 c("factors","loadings","coefX","coefZ","dev","family"))
+	
+	outSCE <- GLMPCA(sce, L = 2, fam = "poi")
+	
+	expect_is(metadata(outSE)$glmpca, "list")
+	expect_true("GLMPCA" %in% reducedDimNames(outSCE))
 	
 	# pathological cases
-	Y[1,1] <- 2
-	expect_error(glmpca(Y, L=2, fam = "bern"), "max(Y) <= 1 is not TRUE", fixed = TRUE)
-	Y[2,2] <- -1
-	expect_error(glmpca(Y, L=2, fam = "poi"), "min(Y) >= 0 is not TRUE", fixed = TRUE)
-	Y[2,] <- 0
-	expect_error(glmpca(Y, L=2, fam = "poi"), "Some rows were all zero,")
+
 })
