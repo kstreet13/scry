@@ -20,6 +20,13 @@ test_that("glmpca works with intended input types", {
 	expect_is(metadata(outSE)$glmpca, "list")
 	expect_true("GLMPCA" %in% reducedDimNames(outSCE))
 	
+	outMAT <- GLMPCA(u, L = 2, fam = "poi")
+	
+	expect_is(outMAT, "list")
+	expect_equal(names(outMAT),
+				 c("factors","loadings","coefX","coefZ","dev","family"))
+	
+	
 	# pathological cases
 
 })
