@@ -10,3 +10,15 @@ setGeneric(
 	}
 )
 
+
+#' @title Deviance Residuals
+#' @name devianceResiduals
+#' @export
+setGeneric(
+	name = "devianceResiduals",
+	signature = 'object',
+	def = function(object, ...) {
+		standardGeneric("devianceResiduals")
+	}
+)
+

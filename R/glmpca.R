@@ -33,7 +33,7 @@
 #'   factors are \code{U} and loadings are \code{V}.
 #'
 #' @return The original \code{SingleCellExperiment} or
-#'   \code{SummarizedExperiment} object, with the GLM-PCA results added to the
+#'   \code{SummarizedExperiment} object with the GLM-PCA results added to the
 #'   \code{metadata} slot. If the original input was a
 #'   \code{SingleCellExperiment}, then a new \code{reducedDim} element called
 #'   \code{"GLMPCA"} will be added, representing the GLM-PCA \code{factors}. If
