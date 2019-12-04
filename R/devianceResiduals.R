@@ -9,10 +9,10 @@
 #'   counts.
 #' @param assay a character or integer specifying which assay to use for GLM-PCA
 #'   (default = 1). Ignored if \code{object} is a matrix.
-#' @param mod a character specifying the model type to be used for calculatind
+#' @param fam a character specifying the model type to be used for calculatind
 #'   deviance residuals.
-#' @param recalcSizeFactors logical, whether cell (column) size factors should
-#'   be calculated according to the specified \code{mod} value. If \code{FALSE},
+#' @param recalcSizeFactors logical, whether column (cell) size factors should
+#'   be calculated according to the specified \code{fam} value. If \code{FALSE},
 #'   existing size factors are used.
 #'   
 #' @return The original \code{SingleCellExperiment} or
@@ -25,16 +25,16 @@
 #' @importFrom SummarizedExperiment colData<-
 #' @export
 setMethod(f = "devianceResiduals",
-		  signature = signature(object = "SummarizedExperiment"),
+		  signature = signature(object = "SingleCellExperiment"),
 		  definition = function(object, assay = 1,
-		  					  mod = c("binomial", "poisson", "geometric"),
+		  					  fam = c("binomial", "poisson", "geometric"),
 		  					  recalcSizeFactors = TRUE){
 		  	
-		  	mod <- match.arg(mod)
+		  	fam <- match.arg(fam)
 		  	m <- assay(object, assay)
 		  	
 		  	if(recalcSizeFactors){
-		  		sz <- compute_size_factors(m, mod)
+		  		sz <- compute_size_factors(m, fam)
 		  		sizeFactors(object) <- sz
 		  	}else{
 		  		sz <- sizeFactors(object)
@@ -43,9 +43,36 @@ setMethod(f = "devianceResiduals",
 		  		}
 		  	}
 		  	
-		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, mod)))
+		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
 		  	
-		  	res$dev_qval <- p.adjust(res$pval, "BH")
+		  	res$dev_qval <- p.adjust(res$dev_pval, "BH")
+		  	
+		  	colData(object) <- cbind(colData(object), res)
+		  	
+		  	return(object)
+		  })	
+
+#' @rdname devianceResiduals
+#' @export
+setMethod(f = "devianceResiduals",
+		  signature = signature(object = "SummarizedExperiment"),
+		  definition = function(object, assay = 1,
+		  					  fam = c("binomial", "poisson", "geometric"),
+		  					  recalcSizeFactors = TRUE){
+		  	
+		  	fam <- match.arg(fam)
+		  	m <- assay(object, assay)
+		  	
+		  	if(!recalcSizeFactors){
+		  		message('Cannot use existing size factors when input is a ',
+		  				'SummarizedExperiment. Setting recalcSizeFactors',
+		  				'= TRUE.')
+		  	}
+		  	sz <- compute_size_factors(m, fam)
+		  	
+		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
+		  	
+		  	res$dev_qval <- p.adjust(res$dev_pval, "BH")
 		  	
 		  	colData(object) <- cbind(colData(object), res)
 		  	
@@ -57,20 +84,20 @@ setMethod(f = "devianceResiduals",
 setMethod(f = "devianceResiduals",
 		  signature = signature(object = "matrix"),
 		  definition = function(object, assay = 1,
-		  					  mod = c("binomial", "poisson", "geometric"),
+		  					  fam = c("binomial", "poisson", "geometric"),
 		  					  recalcSizeFactors = TRUE){
 		  	
-		  	mod <- match.arg(mod)
+		  	fam <- match.arg(fam)
 		  	m <- object
 		  	if(!recalcSizeFactors){
 		  		message('Cannot use existing size factors when input is a ',
 		  				'matrix. Setting recalcSizeFactors = TRUE.')
 		  	}
-		  	sz <- compute_size_factors(m, mod)
+		  	sz <- compute_size_factors(m, fam)
 		  	
-		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, mod)))
+		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
 		  	
-		  	res$dev_qval <- p.adjust(res$pval, "BH")
+		  	res$dev_qval <- p.adjust(res$dev_pval, "BH")
 		  	
 		  	return(res)
 		  })	

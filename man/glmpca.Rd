@@ -48,8 +48,9 @@ counts.}
 
 \item{L}{the desired number of latent dimensions (integer).}
 
-\item{fam}{character describing the likelihood to use for the data (poisson,
-negative binomial, binomial approximation to multinomial, bernoulli).}
+\item{fam}{character describing the likelihood to use for the data
+(poisson, negative binomial, binomial approximation to multinomial,
+bernoulli).}
 
 \item{ctl}{a list of control parameters for optimization.}
 

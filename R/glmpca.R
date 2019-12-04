@@ -11,8 +11,9 @@
 #'   (default = 1). Ignored if \code{object} is a matrix.
 #'
 #' @param L the desired number of latent dimensions (integer).
-#' @param fam character describing the likelihood to use for the data (poisson,
-#'   negative binomial, binomial approximation to multinomial, bernoulli).
+#' @param fam character describing the likelihood to use for the data
+#'   (poisson, negative binomial, binomial approximation to multinomial,
+#'   bernoulli).
 #' @param ctl a list of control parameters for optimization.
 #' @param penalty the L2 penalty for the latent factors (default = 1).
 #'   Regression coefficients are not penalized.
@@ -41,7 +42,7 @@
 #'   \code{\link[glmpca]{glmpca}}.
 #'   
 #' 
-#' @importFrom glmpca glmpca
+#' @import glmpca
 #' @importFrom SingleCellExperiment reducedDim<-
 #' @export
 setMethod(f = "GLMPCA",

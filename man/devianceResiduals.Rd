@@ -2,23 +2,31 @@
 % Please edit documentation in R/AllGenerics.R, R/devianceResiduals.R
 \name{devianceResiduals}
 \alias{devianceResiduals}
+\alias{devianceResiduals,SingleCellExperiment-method}
 \alias{devianceResiduals,SummarizedExperiment-method}
 \alias{devianceResiduals,matrix-method}
 \title{Deviance Residuals}
 \usage{
 devianceResiduals(object, ...)
 
+\S4method{devianceResiduals}{SingleCellExperiment}(
+  object,
+  assay = 1,
+  fam = c("binomial", "poisson", "geometric"),
+  recalcSizeFactors = TRUE
+)
+
 \S4method{devianceResiduals}{SummarizedExperiment}(
   object,
   assay = 1,
-  mod = c("binomial", "poisson", "geometric"),
+  fam = c("binomial", "poisson", "geometric"),
   recalcSizeFactors = TRUE
 )
 
 \S4method{devianceResiduals}{matrix}(
   object,
   assay = 1,
-  mod = c("binomial", "poisson", "geometric"),
+  fam = c("binomial", "poisson", "geometric"),
   recalcSizeFactors = TRUE
 )
 }
@@ -30,11 +38,11 @@ counts.}
 \item{assay}{a character or integer specifying which assay to use for GLM-PCA
 (default = 1). Ignored if \code{object} is a matrix.}
 
-\item{mod}{a character specifying the model type to be used for calculatind
+\item{fam}{a character specifying the model type to be used for calculatind
 deviance residuals.}
 
-\item{recalcSizeFactors}{logical, whether cell (column) size factors should
-be calculated according to the specified \code{mod} value. If \code{FALSE},
+\item{recalcSizeFactors}{logical, whether column (cell) size factors should
+be calculated according to the specified \code{fam} value. If \code{FALSE},
 existing size factors are used.}
 }
 \value{

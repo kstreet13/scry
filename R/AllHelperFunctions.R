@@ -1,3 +1,16 @@
+#' @title compute_size_factors
+#' @name compute_size_factors
+#' @description This function computes column-wise size factors as appropriate
+#'   to a particular, discrete model.
+#' 
+#' @param m a matrix of integer count values.
+#' @param mod a character specifying the model type to be used for calculatind
+#'   size factors.
+#' 
+#' @return A vector of size factors with length equal to the number of columns
+#'   of \code{m}.
+#' 
+#' @importFrom Matrix colSums
 #' @export
 compute_size_factors <- function(m, 
 								 mod = c("binomial", "poisson", "geometric")){
@@ -42,13 +55,13 @@ compute_size_factors <- function(m,
 	res
 }
 
-.poisson_deviance <- function(x,mu,sz){
+.poisson_deviance <- function(x, mu, sz){
 	#assumes log link and size factor sz on the same scale as x (not logged)
 	#stopifnot(all(x>=0 & sz>0))
 	2*sum(x*log(x/(sz*mu)),na.rm=TRUE)-2*sum(x-sz*mu)
 }
 
-.binomial_deviance <- function(x,p,n){
+.binomial_deviance <- function(x, p, n){
 	term1 <- sum(x*log(x/(n*p)), na.rm=TRUE)
 	nx <- n-x
 	term2 <- sum(nx*log(nx/(n*(1-p))), na.rm=TRUE)
