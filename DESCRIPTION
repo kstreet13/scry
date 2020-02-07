@@ -16,7 +16,8 @@ Imports:
     glmpca,
     Matrix,
     SingleCellExperiment,
-    SummarizedExperiment
+    SummarizedExperiment,
+    MASS
 Suggests:
     knitr,
     testthat,
@@ -24,4 +25,4 @@ Suggests:
 VignetteBuilder: knitr
 LazyData: false
 BugReports: https://github.com/kstreet/untitled_singlecell/issues
-RoxygenNote: 7.0.0
+RoxygenNote: 7.0.2

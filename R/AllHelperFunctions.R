@@ -25,6 +25,8 @@ compute_size_factors <- function(m,
 	return(sz) #geometric, use log scale size factors
 }
 
+#' @importFrom MASS negative.binomial
+#' @importFrom stats pchisq glm
 .gof_func <- function(x, sz, 
 				   mod=c("binomial","poisson","geometric")){
 	#Let n=colSums(original matrix where x is a row)
@@ -40,7 +42,7 @@ compute_size_factors <- function(m,
 		fit$deviance <- .poisson_deviance(x,sum(x)/sum(sz),sz)
 	} else if(mod=="geometric"){
 		if(any(x>0)) {
-			fit <- glm(x ~ offset(sz), family=MASS::negative.binomial(theta=1))
+			fit <- glm(x ~ offset(sz), family=negative.binomial(theta=1))
 		}
 	} else { stop("invalid model") }
 	if(fit$converged){

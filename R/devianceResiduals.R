@@ -23,6 +23,9 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment colData<-
+#' @importFrom SingleCellExperiment sizeFactors
+#' @importFrom SingleCellExperiment sizeFactors<-
+#' @importFrom stats p.adjust
 #' @export
 setMethod(f = "devianceResiduals",
 		  signature = signature(object = "SingleCellExperiment"),
@@ -72,7 +75,7 @@ setMethod(f = "devianceResiduals",
 		  	
 		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
 		  	
-		  	res$dev_qval <- p.adjust(res$dev_pval, "BH")
+		  	res$dev_qval <- stats::p.adjust(res$dev_pval, "BH")
 		  	
 		  	colData(object) <- cbind(colData(object), res)
 		  	
@@ -97,7 +100,7 @@ setMethod(f = "devianceResiduals",
 		  	
 		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
 		  	
-		  	res$dev_qval <- p.adjust(res$dev_pval, "BH")
+		  	res$dev_qval <- stats::p.adjust(res$dev_pval, "BH")
 		  	
 		  	return(res)
 		  })	

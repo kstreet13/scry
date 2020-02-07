@@ -1,6 +1,6 @@
 
 #' @title GLM-PCA
-#' @name GLMPCA
+#' @rdname GLMPCA
 #' @export
 setGeneric(
 	name = "GLMPCA",
@@ -12,7 +12,7 @@ setGeneric(
 
 
 #' @title Deviance Residuals
-#' @name devianceResiduals
+#' @rdname devianceResiduals
 #' @export
 setGeneric(
 	name = "devianceResiduals",

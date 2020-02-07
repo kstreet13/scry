@@ -1,4 +1,4 @@
 library(testthat)
-library(glmpca)
+library(untitledsinglecell)
 
 test_check("glmpca")

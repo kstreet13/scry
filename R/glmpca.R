@@ -44,6 +44,7 @@
 #' 
 #' @import glmpca
 #' @importFrom SingleCellExperiment reducedDim<-
+#' @importFrom methods is
 #' @export
 setMethod(f = "GLMPCA",
 		  signature = signature(object = "SummarizedExperiment"),
