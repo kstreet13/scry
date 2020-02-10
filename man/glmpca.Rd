@@ -2,7 +2,6 @@
 % Please edit documentation in R/AllGenerics.R, R/glmpca.R
 \name{GLMPCA}
 \alias{GLMPCA}
-\alias{GLMPCA,SummarizedExperiment-method}
 \alias{GLMPCA,matrix-method}
 \title{GLM-PCA}
 \usage{

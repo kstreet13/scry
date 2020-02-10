@@ -26,3 +26,4 @@ VignetteBuilder: knitr
 LazyData: false
 BugReports: https://github.com/kstreet/untitled_singlecell/issues
 RoxygenNote: 7.0.2
+Encoding: UTF-8
