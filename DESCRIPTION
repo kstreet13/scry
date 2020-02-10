@@ -1,5 +1,5 @@
-Package: untitledsinglecell
-Title: Single-Cell RNA-seq Methods from the Rafalab
+Package: scry
+Title: Small-Count Analysis Methods from the Rafalab
 Version: 0.0.1
 Description: This package incorporates several analysis methods developed
             by members of the Irizarry lab.
