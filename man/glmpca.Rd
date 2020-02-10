@@ -43,6 +43,9 @@ GLMPCA(object, ...)
 \link{SummarizedExperiment} object. Alternatively, a matrix of integer
 counts.}
 
+\item{...}{for the generic, additional arguments to pass to object-specific
+methods.}
+
 \item{assay}{a character or integer specifying which assay to use for GLM-PCA
 (default = 1). Ignored if \code{object} is a matrix.}
 

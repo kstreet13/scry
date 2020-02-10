@@ -1,6 +1,8 @@
 
 #' @title GLM-PCA
 #' @rdname GLMPCA
+#' @param ... for the generic, additional arguments to pass to object-specific
+#'   methods.
 #' @export
 setGeneric(
 	name = "GLMPCA",
@@ -13,6 +15,8 @@ setGeneric(
 
 #' @title Deviance Residuals
 #' @rdname devianceResiduals
+#' @param ... for the generic, additional arguments to pass to object-specific
+#'   methods.
 #' @export
 setGeneric(
 	name = "devianceResiduals",
