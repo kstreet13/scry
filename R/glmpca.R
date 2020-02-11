@@ -1,4 +1,5 @@
-#' @name GLMPCA
+#' @title Generalized principal component analysis
+#' @rdname GLMPCA
 #' @description This function implements the GLM-PCA dimensionality reduction
 #'   method for high-dimensional count data. This is a wrapper for
 #'   \code{\link[glmpca]{glmpca}}.

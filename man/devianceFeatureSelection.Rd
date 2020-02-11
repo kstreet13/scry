@@ -2,6 +2,7 @@
 % Please edit documentation in R/AllGenerics.R, R/featureSelection.R
 \name{devianceFeatureSelection}
 \alias{devianceFeatureSelection}
+\alias{devianceFeatureSelection,SummarizedExperiment-method}
 \alias{devianceFeatureSelection,matrix-method}
 \title{Feature selection by approximate multinomial deviance}
 \usage{

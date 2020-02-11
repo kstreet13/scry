@@ -2,6 +2,7 @@
 % Please edit documentation in R/AllGenerics.R, R/nullResiduals.R
 \name{nullResiduals}
 \alias{nullResiduals}
+\alias{nullResiduals,SummarizedExperiment-method}
 \alias{nullResiduals,matrix-method}
 \title{Residuals from an approximate multinomial null model}
 \usage{

@@ -68,7 +68,7 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 }
 
 #' @title Residuals from an approximate multinomial null model
-#' @name nullResiduals
+#' @rdname nullResiduals
 #' @description Computes deviance or Pearson residuals for count data based on
 #'   a multinomial null model that assumes each feature has a constant rate.
 #'   The residuals matrix can be analyzed with standard PCA as a fast approximation

@@ -52,7 +52,7 @@ compute_deviance_batch<-function(m,fam=c("binomial","poisson"),batch=NULL){
 }
 
 #' @title Feature selection by approximate multinomial deviance
-#' @name devianceFeatureSelection
+#' @rdname devianceFeatureSelection
 #' @description Computes a deviance statistic for each row feature (such as a gene) for count data 
 #'   based on a multinomial null model that assumes each feature has a constant rate.
 #'   Features with large deviance are likely to be informative. Uninformative, low deviance features

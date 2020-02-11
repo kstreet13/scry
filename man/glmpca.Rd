@@ -2,6 +2,7 @@
 % Please edit documentation in R/AllGenerics.R, R/glmpca.R
 \name{GLMPCA}
 \alias{GLMPCA}
+\alias{GLMPCA,SummarizedExperiment-method}
 \alias{GLMPCA,matrix-method}
 \title{Generalized principal components analysis for non-normally distributed data}
 \usage{
