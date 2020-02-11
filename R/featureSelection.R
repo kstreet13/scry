@@ -55,36 +55,5 @@ source("./util/functions.R") #needed for compute_gene_info
 #' @export
 featureSelectDeviance
 
-compute_gene_info<-function(m,gmeta=NULL,fam=c("binomial","poisson","geometric")){
-  #m a data matrix with genes=rows
-  #gmeta a pre-existing data frame with gene-level metadata
-  fam<-match.arg(fam)
-  if(!is.null(gmeta)){ stopifnot(nrow(m)==nrow(gmeta)) }
-  gnz<-Matrix::rowSums(m>0)
-  sz<-compute_size_factors(m,fam)
-  gof<-function(g){ gof_func(m[g,],sz,fam) }
-  gof<-as.data.frame(t(vapply(1:nrow(m),gof,FUN.VALUE=rep(0.0,2))))
-  #colnames(gof)<-c("deviance","pval")
-  gmu<-Matrix::rowMeans(m)
-  gvar<-apply(m,1,var)
-  gfano<-ifelse(gvar>0 & gmu>0, gvar/gmu, 0)
-  res<-cbind(nzsum=gnz,fano=gfano,gof)
-  res$pval_fdr<-p.adjust(res$pval,"BH")
-  if(is.null(gmeta)){ return(res) } else { return(cbind(gmeta,res)) }
-}
 
-
-filterDev<-function(sce,nkeep=nrow(sce),fam=c("binomial","poisson","geometric"),ret=c("sce","ranks")){
-  fam<-match.arg(fam)
-  ret<-match.arg(ret)
-  gm<-compute_gene_info(counts(sce),gmeta=rowData(sce),fam=fam)
-  o<-order(gm$deviance,decreasing=TRUE,na.last=FALSE)[1:nkeep]
-  #NA deviance => badly fitting null model=> highly variable gene
-  if(ret=="sce"){
-    res<-sce[o,]
-    return(res[,colSums(counts(res))>0])
-  } else {
-    return(rownames(sce)[o])
-  }
-}
 
