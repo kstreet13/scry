@@ -1,4 +1,4 @@
-context("Test GLMPCA and devianceResiduals")
+context("Test GLMPCA and nullResiduals")
 set.seed(1234)
 
 test_that("GLMPCA works with intended input types", {
@@ -32,9 +32,7 @@ test_that("GLMPCA works with intended input types", {
 
 })
 
-
-
-test_that("devianceResiduals works with intended input types", {
+test_that("nullResiduals works with intended input types", {
 	ncells <- 100
 	u <- matrix(rpois(2000, 5), ncol=ncells)
 	v <- log2(u + 1)
@@ -43,21 +41,13 @@ test_that("devianceResiduals works with intended input types", {
 	se <- SummarizedExperiment(assays=list(counts=u, logcounts=v))
 	sce <- SingleCellExperiment(assays=list(counts=u, logcounts=v))
 	
-	outSE <- devianceResiduals(se, fam = "bin")
-	expect_true(all(c('deviance','dev_pval','dev_qval') %in% 
-						names(colData(outSE))))
+	outSE <- nullResiduals(se, fam = "binomial")
+	expect_true("binomial_deviance_residuals" %in% assayNames(outSE))
+	outSE <- nullResiduals(se, fam = "binomial", type = "pearson")
+	expect_true("binomial_pearson_residuals" %in% assayNames(outSE))
+	outSE <- nullResiduals(se, fam = "poisson")
+	expect_true("poisson_deviance_residuals" %in% assayNames(outSE))
+	outSE <- nullResiduals(se, fam = "poisson", type = "pearson")
+	expect_true("poisson_pearson_residuals" %in% assayNames(outSE))
 
-	expect_message(outSE <- devianceResiduals(se, assay = 'logcounts', fam = "poi",
-							   recalcSizeFactors = FALSE), 
-				   'Cannot use existing size factors')
-	expect_true(all(c('deviance','dev_pval','dev_qval') %in% 
-						names(colData(outSE))))
-	
-	outSE <- devianceResiduals(se, assay = 2, fam = "geo")
-	expect_true(all(c('deviance','dev_pval','dev_qval') %in% 
-						names(colData(outSE))))
-	
-
-	# pathological cases
-	
 })

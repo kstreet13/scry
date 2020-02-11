@@ -11,14 +11,14 @@ nullResiduals(object, ...)
   object,
   assay = 1,
   fam = c("binomial", "poisson"),
-  type = c("deviance", "poisson"),
+  type = c("deviance", "pearson"),
   batch = NULL
 )
 
 \S4method{nullResiduals}{matrix}(
   object,
   fam = c("binomial", "poisson"),
-  type = c("deviance", "poisson"),
+  type = c("deviance", "pearson"),
   batch = NULL
 )
 }

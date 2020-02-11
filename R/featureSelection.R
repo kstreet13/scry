@@ -106,7 +106,7 @@ setMethod(f = "devianceFeatureSelection",
             m <- assay(object, assay)
             dev<-compute_deviance_batch(m, fam, batch)
             name<-paste(fam, "residuals", sep="_")
-            rowData(object)<-cbind(rowData(object), name=res)
+            rowData(object)<-cbind(rowData(object), name=dev)
             if(nkeep>=length(dev)){ nkeep<-NULL } #user wants to keep all features
             if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are taking a subset of rows
             if(sorted){ 

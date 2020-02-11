@@ -115,7 +115,7 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 setMethod(f = "nullResiduals",
           signature = signature(object = "SummarizedExperiment"),
 		      definition = function(object, assay = 1, fam = c("binomial", "poisson"),
-		                            type=c("deviance","poisson"),
+		                            type=c("deviance","pearson"),
 		                            batch=NULL){
 		        fam<-match.arg(fam); type<-match.arg(type)
 		  	    m <- assay(object, assay)
@@ -129,7 +129,7 @@ setMethod(f = "nullResiduals",
 setMethod(f = "nullResiduals",
 		  signature = signature(object = "matrix"),
 		  definition = function(object,fam = c("binomial", "poisson"),
-		                        type=c("deviance","poisson"),
+		                        type=c("deviance","pearson"),
 		                        batch=NULL){
 		    fam<-match.arg(fam); type<-match.arg(type)
 		    return(null_residuals_batch(object,fam,type,batch))
