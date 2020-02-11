@@ -1,110 +1,139 @@
 
-#' @rdname devianceResiduals
-#' @description This function computes deviance residuals for count-based
-#'   features. Deviance residuals may be used in place of variance for feature
-#'   selection.
+##### helper functions #######
+
+binomial_deviance_residuals<-function(X,p,n){
+  #X a matrix, n is vector of length ncol(X)
+  stopifnot(length(n)==ncol(X))
+  if(length(p)==nrow(X)){ 
+    #p is a vector, length must match nrow(X)
+    mu<-outer(p,n)
+  } else if(!is.null(dim(p)) && dim(p)==dim(X)){
+    # p is matrix, must have same dims as X
+    mu<-t(t(p)*n)
+  } else { stop("dimensions of p and X must match!") }
+  term1<-X*log(X/mu)
+  term1[is.na(term1)]<-0 #0*log(0)=0
+  nx<- t(n-t(X))
+  term2<-nx*log(nx/outer(1-p,n))
+  #this next line would only matter if all counts
+  #were from a single gene, so not checking saves time.
+  # term2[is.na(term2)]<-0 
+  sign(X-mu)*sqrt(2*(term1+term2))
+}
+
+poisson_deviance_residuals<-function(x,xhat){
+  #x,xhat assumed to be same dimension
+  #sz<-exp(offsets)
+  #xhat<-lambda*sz
+  term1<-x*log(x/xhat)
+  term1[is.na(term1)]<-0 #0*log(0)=0
+  s2<-2*(term1-(x-xhat))
+  sign(x-xhat)*sqrt(abs(s2))
+}
+
+null_residuals<-function(m,fam=c("binomial","poisson"),type=c("deviance","pearson")){
+  #m is a matrix
+  fam<-match.arg(fam); type<-match.arg(type)
+  sz<-compute_size_factors(m,fam)
+  if(fam=="binomial") {
+    phat<-Matrix::rowSums(m)/sum(sz)
+    if(type=="deviance"){
+      return(binomial_deviance_residuals(m,phat,sz))
+    } else { #deviance residuals
+      mhat<-outer(phat,sz)
+      return((m-mhat)/sqrt(mhat*(1-phat)))
+    }
+  } else { #fam=="poisson"
+    mhat<-outer(Matrix::rowSums(m)/sum(sz), sz) #first argument is "lambda hat" (MLE)
+    if(type=="deviance"){ 
+      return(poisson_deviance_residuals(m,mhat))
+    } else { #pearson residuals
+      return((m-mhat)/sqrt(mhat))
+    }
+  } 
+}
+
+null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","pearson"),batch=NULL){
+  #null residuals but with batch indicator (batch=a factor)
+  fam<-match.arg(fam); type<-match.arg(type)
+  if(is.null(batch)){
+    return(null_residuals(m,fam=fam,type=type))
+  } else { #case where there is more than one batch
+    stopifnot(length(batch)==ncol(m))
+    res<-matrix(0.0,nrow=nrow(m),ncol=ncol(m))
+    for(b in levels(batch)){
+      idx<-(batch==b)
+      res[,idx]<-null_residuals(m[,idx],fam=fam,type=type)
+    }
+    return(res)
+  }
+}
+
+#' @title Residuals from an approximate multinomial null model
+#' @name nullResiduals
+#' @description Computes deviance or Pearson residuals for count data based on
+#'   a multinomial null model that assumes each feature has a constant rate.
+#'   The residuals matrix can be analyzed with standard PCA as a fast approximation
+#'   to GLM-PCA.
 #' 
-#' @param object A \code{\link{SingleCellExperiment}} or
-#'   \link{SummarizedExperiment} object. Alternatively,  a matrix of integer
-#'   counts.
-#' @param assay a character or integer specifying which assay to use for GLM-PCA
+#' @param object an object inheriting from \link{SummarizedExperiment} 
+#'   (such as \code{\link{SingleCellExperiment}}). 
+#'   Alternatively, a matrix or sparse Matrix of integer counts.
+#' @param assay a character or integer specifying which assay contains the count data
 #'   (default = 1). Ignored if \code{object} is a matrix.
-#' @param fam a character specifying the model type to be used for calculatind
-#'   deviance residuals.
-#' @param recalcSizeFactors logical, whether column (cell) size factors should
-#'   be calculated according to the specified \code{fam} value. If \code{FALSE},
-#'   existing size factors are used.
+#' @param fam a character specifying the model type to be used for calculating
+#'   the residuals. Binomial (the default) is the closest approximation to multinomial, 
+#'   but Poisson may be faster to compute and often is very similar to binomial.
+#' @param type should deviance or Pearson residuals be used? 
+#' @param batch an optional factor indicating batch membership of observations. If provided,
+#'   the null model is computed within each batch separately to regress out the batch
+#'   effect from the resulting residuals.
 #'   
 #' @return The original \code{SingleCellExperiment} or
-#'   \code{SummarizedExperiment} object with the deviance residuals, p-values,
-#'   and q-values added to the \code{colData}. If the input was a matrix, output
-#'   is a \code{data.frame} with these columns.
+#'   \code{SummarizedExperiment} object with the residuals appended as a new assay. 
+#'   The assay name will be fam_type_residuals (eg, binomial_deviance_residuals).
+#'   If the input was a matrix or sparse Matrix, output is a dense matrix containing
+#'   the residuals.
 #'   
+#' @details This function should be used only on the un-normalized counts.
+#'   It was originally designed for single-cell RNA-seq counts 
+#'   obtained by the use of unique molecular identifiers (UMIs) and has not been 
+#'   tested on read count data without UMIs or other data types.
+#'   
+#'   Note that even though a sparse Matrix is accepted as input, the output
+#'   is always a dense matrix since the residuals transformation is not sparsity preserving.
+#'   To avoid memory issues, it is recommended to perform feature selection first and
+#'   subset the number of features to a smaller size prior to computing the residuals.
+#'   
+#' @references
+#'   Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019).
+#'   Feature Selection and Dimension Reduction for Single Cell RNA-Seq based on a Multinomial Model.
+#'   \emph{Genome Biology}
+#'   \url{https://doi.org/10.1186/s13059-019-1861-6}
+#' 
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment colData<-
-#' @importFrom SingleCellExperiment sizeFactors
-#' @importFrom SingleCellExperiment sizeFactors<-
-#' @importFrom stats p.adjust
 #' @export
-setMethod(f = "devianceResiduals",
-		  signature = signature(object = "SingleCellExperiment"),
-		  definition = function(object, assay = 1,
-		  					  fam = c("binomial", "poisson", "geometric"),
-		  					  recalcSizeFactors = TRUE){
-		  	
-		  	fam <- match.arg(fam)
-		  	m <- assay(object, assay)
-		  	
-		  	if(recalcSizeFactors){
-		  		sz <- compute_size_factors(m, fam)
-		  		sizeFactors(object) <- sz
-		  	}else{
-		  		sz <- sizeFactors(object)
-		  		if(is.null(sz)){
-		  			stop('No existing size factors found.')
-		  		}
-		  	}
-		  	
-		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
-		  	
-		  	res$dev_qval <- p.adjust(res$dev_pval, "BH")
-		  	
-		  	colData(object) <- cbind(colData(object), res)
-		  	
-		  	return(object)
-		  })	
-
-#' @rdname devianceResiduals
-#' @export
-setMethod(f = "devianceResiduals",
+setMethod(f = "nullResiduals",
 		  signature = signature(object = "SummarizedExperiment"),
-		  definition = function(object, assay = 1,
-		  					  fam = c("binomial", "poisson", "geometric"),
-		  					  recalcSizeFactors = TRUE){
-		  	
-		  	fam <- match.arg(fam)
+		  definition = function(object, assay = 1, fam = c("binomial", "poisson"),
+		                        type=c("deviance","poisson"),
+		                        batch=NULL){
+		  	fam<-match.arg(fam); type<-match.arg(type)
 		  	m <- assay(object, assay)
-		  	
-		  	if(!recalcSizeFactors){
-		  		message('Cannot use existing size factors when input is a ',
-		  				'SummarizedExperiment. Setting recalcSizeFactors',
-		  				'= TRUE.')
-		  	}
-		  	sz <- compute_size_factors(m, fam)
-		  	
-		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
-		  	
-		  	res$dev_qval <- stats::p.adjust(res$dev_pval, "BH")
-		  	
-		  	colData(object) <- cbind(colData(object), res)
-		  	
+		  	name<-paste(fam,type,"residuals",sep="_")
+		  	assay(object,name)<-null_residuals_batch(m,fam,type,batch)
 		  	return(object)
 		  })	
 
-#' @rdname devianceResiduals
+#' @rdname nullResiduals
 #' @export
-setMethod(f = "devianceResiduals",
+setMethod(f = "nullResiduals",
 		  signature = signature(object = "matrix"),
-		  definition = function(object, assay = 1,
-		  					  fam = c("binomial", "poisson", "geometric"),
-		  					  recalcSizeFactors = TRUE){
-		  	
-		  	fam <- match.arg(fam)
-		  	m <- object
-		  	if(!recalcSizeFactors){
-		  		message('Cannot use existing size factors when input is a ',
-		  				'matrix. Setting recalcSizeFactors = TRUE.')
-		  	}
-		  	sz <- compute_size_factors(m, fam)
-		  	
-		  	res <- as.data.frame(t(apply(m, 1, .gof_func, sz, fam)))
-		  	
-		  	res$dev_qval <- stats::p.adjust(res$dev_pval, "BH")
-		  	
-		  	return(res)
-		  })	
-
-
-
-
+		  definition = function(object,fam = c("binomial", "poisson"),
+		                        type=c("deviance","poisson"),
+		                        batch=NULL){
+		    fam<-match.arg(fam); type<-match.arg(type)
+		    return(null_residuals_batch(object,fam,type,batch))
+		  })
