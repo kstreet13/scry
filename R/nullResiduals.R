@@ -1,6 +1,3 @@
-
-##### helper functions #######
-
 binomial_deviance_residuals<-function(X,p,n){
   #X a matrix, n is vector of length ncol(X)
   stopifnot(length(n)==ncol(X))
@@ -79,9 +76,9 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 #' @param object an object inheriting from \link{SummarizedExperiment} 
 #'   (such as \code{\link{SingleCellExperiment}}). 
 #'   Alternatively, a matrix or sparse Matrix of integer counts.
-#' @param assay a character or integer specifying which assay contains the count data
+#' @param assay a string or integer specifying which assay contains the count data
 #'   (default = 1). Ignored if \code{object} is a matrix.
-#' @param fam a character specifying the model type to be used for calculating
+#' @param fam a string specifying the model type to be used for calculating
 #'   the residuals. Binomial (the default) is the closest approximation to multinomial, 
 #'   but Poisson may be faster to compute and often is very similar to binomial.
 #' @param type should deviance or Pearson residuals be used? 
@@ -112,20 +109,19 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 #'   \url{https://doi.org/10.1186/s13059-019-1861-6}
 #' 
 #' @importFrom SummarizedExperiment assay
-#' @importFrom SummarizedExperiment colData
-#' @importFrom SummarizedExperiment colData<-
+#' @importFrom SummarizedExperiment assay<-
 #' @export
 setMethod(f = "nullResiduals",
-		  signature = signature(object = "SummarizedExperiment"),
-		  definition = function(object, assay = 1, fam = c("binomial", "poisson"),
-		                        type=c("deviance","poisson"),
-		                        batch=NULL){
-		  	fam<-match.arg(fam); type<-match.arg(type)
-		  	m <- assay(object, assay)
-		  	name<-paste(fam,type,"residuals",sep="_")
-		  	assay(object,name)<-null_residuals_batch(m,fam,type,batch)
-		  	return(object)
-		  })	
+          signature = signature(object = "SummarizedExperiment"),
+		      definition = function(object, assay = 1, fam = c("binomial", "poisson"),
+		                            type=c("deviance","poisson"),
+		                            batch=NULL){
+		        fam<-match.arg(fam); type<-match.arg(type)
+		  	    m <- assay(object, assay)
+		  	    name<-paste(fam,type,"residuals",sep="_")
+		  	    assay(object,name)<-null_residuals_batch(m,fam,type,batch)
+		  	    return(object)
+          })	
 
 #' @rdname nullResiduals
 #' @export
