@@ -28,6 +28,7 @@ poisson_deviance_residuals<-function(x,xhat){
   sign(x-xhat)*sqrt(abs(s2))
 }
 
+#' @importFrom Matrix rowSums
 null_residuals<-function(m,fam=c("binomial","poisson"),type=c("deviance","pearson")){
   #m is a matrix
   fam<-match.arg(fam); type<-match.arg(type)

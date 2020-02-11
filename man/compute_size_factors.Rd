@@ -2,14 +2,14 @@
 % Please edit documentation in R/AllHelperFunctions.R
 \name{compute_size_factors}
 \alias{compute_size_factors}
-\title{compute_size_factors}
+\title{Compute size factors}
 \usage{
-compute_size_factors(m, mod = c("binomial", "poisson", "geometric"))
+compute_size_factors(m, fam = c("binomial", "poisson"))
 }
 \arguments{
-\item{m}{a matrix of integer count values.}
+\item{m}{a matrix or sparse \code{\link{Matrix}} of integer count values.}
 
-\item{mod}{a character specifying the model type to be used for calculatind
+\item{fam}{a string specifying the model type to be used for calculating
 size factors.}
 }
 \value{
@@ -17,6 +17,12 @@ A vector of size factors with length equal to the number of columns
   of \code{m}.
 }
 \description{
-This function computes column-wise size factors as appropriate
-  to a particular, discrete model.
+Computes a size factor for each observation (column) of a 
+  count data matrix based on an approximate multinomial model.
+}
+\details{
+Both fam options are approximations to a multinomial model. Size factors
+  for binomial are simply the column sums (total counts for each sample). For
+  Poisson, the size factors are given by the column sums after rescaling to
+  have geometric mean of one. This improves numerical stability.
 }

@@ -126,4 +126,7 @@ setMethod(f = "devianceFeatureSelection",
 #' @export
 setMethod(f = "devianceFeatureSelection",
           signature = signature(object = "matrix"),
-          definition = compute_deviance_batch)
+          definition = function(object, fam = c("binomial", "poisson"), batch = NULL){
+            fam<-match.arg(fam)
+            compute_deviance_batch(object,fam,batch)
+          })

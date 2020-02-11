@@ -1,5 +1,17 @@
+#' @title Feature selection by approximate multinomial deviance
+#' @rdname devianceFeatureSelection
+#' @param ... for the generic, additional arguments to pass to object-specific
+#'   methods.
+#' @export
+setGeneric(
+  name = "devianceFeatureSelection",
+  signature = 'object',
+  def = function(object, ...) {
+    standardGeneric("devianceFeatureSelection")
+  }
+)
 
-#' @title GLM-PCA
+#' @title Generalized principal components analysis for non-normally distributed data
 #' @rdname GLMPCA
 #' @param ... for the generic, additional arguments to pass to object-specific
 #'   methods.
@@ -12,17 +24,15 @@ setGeneric(
 	}
 )
 
-
-#' @title Deviance Residuals
-#' @rdname devianceResiduals
+#' @title Residuals from an approximate multinomial null model
+#' @rdname nullResiduals
 #' @param ... for the generic, additional arguments to pass to object-specific
 #'   methods.
 #' @export
 setGeneric(
-	name = "devianceResiduals",
+	name = "nullResiduals",
 	signature = 'object',
 	def = function(object, ...) {
-		standardGeneric("devianceResiduals")
+		standardGeneric("nullResiduals")
 	}
 )
-

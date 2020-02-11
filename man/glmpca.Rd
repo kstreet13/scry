@@ -3,7 +3,7 @@
 \name{GLMPCA}
 \alias{GLMPCA}
 \alias{GLMPCA,matrix-method}
-\title{GLM-PCA}
+\title{Generalized principal components analysis for non-normally distributed data}
 \usage{
 GLMPCA(object, ...)
 
