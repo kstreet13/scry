@@ -4,6 +4,7 @@
 \alias{devianceFeatureSelection}
 \alias{devianceFeatureSelection,SummarizedExperiment-method}
 \alias{devianceFeatureSelection,matrix-method}
+\alias{devianceFeatureSelection,Matrix-method}
 \title{Feature selection by approximate multinomial deviance}
 \usage{
 devianceFeatureSelection(object, ...)
@@ -18,6 +19,8 @@ devianceFeatureSelection(object, ...)
 )
 
 \S4method{devianceFeatureSelection}{matrix}(object, fam = c("binomial", "poisson"), batch = NULL)
+
+\S4method{devianceFeatureSelection}{Matrix}(object, fam = c("binomial", "poisson"), batch = NULL)
 }
 \arguments{
 \item{object}{an object inheriting from \link{SummarizedExperiment} 

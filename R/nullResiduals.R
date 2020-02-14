@@ -28,13 +28,12 @@ poisson_deviance_residuals<-function(x,xhat){
   sign(x-xhat)*sqrt(abs(s2))
 }
 
-#' @importFrom Matrix rowSums
 null_residuals<-function(m,fam=c("binomial","poisson"),type=c("deviance","pearson")){
   #m is a matrix
   fam<-match.arg(fam); type<-match.arg(type)
   sz<-compute_size_factors(m,fam)
   if(fam=="binomial") {
-    phat<-Matrix::rowSums(m)/sum(sz)
+    phat<-rowSums(m)/sum(sz)
     if(type=="deviance"){
       return(binomial_deviance_residuals(m,phat,sz))
     } else { #deviance residuals
@@ -42,7 +41,7 @@ null_residuals<-function(m,fam=c("binomial","poisson"),type=c("deviance","pearso
       return((m-mhat)/sqrt(mhat*(1-phat)))
     }
   } else { #fam=="poisson"
-    mhat<-outer(Matrix::rowSums(m)/sum(sz), sz) #first argument is "lambda hat" (MLE)
+    mhat<-outer(rowSums(m)/sum(sz), sz) #first argument is "lambda hat" (MLE)
     if(type=="deviance"){ 
       return(poisson_deviance_residuals(m,mhat))
     } else { #pearson residuals
@@ -76,7 +75,7 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 #' 
 #' @param object an object inheriting from \link{SummarizedExperiment} 
 #'   (such as \code{\link{SingleCellExperiment}}). 
-#'   Alternatively, a matrix or sparse Matrix of integer counts.
+#'   Alternatively, a matrix of integer counts.
 #' @param assay a string or integer specifying which assay contains the count data
 #'   (default = 1). Ignored if \code{object} is a matrix.
 #' @param fam a string specifying the model type to be used for calculating
@@ -90,7 +89,7 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 #' @return The original \code{SingleCellExperiment} or
 #'   \code{SummarizedExperiment} object with the residuals appended as a new assay. 
 #'   The assay name will be fam_type_residuals (eg, binomial_deviance_residuals).
-#'   If the input was a matrix or sparse Matrix, output is a dense matrix containing
+#'   If the input was a matrix, output is a dense matrix containing
 #'   the residuals.
 #'   
 #' @details This function should be used only on the un-normalized counts.
@@ -98,8 +97,11 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
 #'   obtained by the use of unique molecular identifiers (UMIs) and has not been 
 #'   tested on read count data without UMIs or other data types.
 #'   
-#'   Note that even though a sparse Matrix is accepted as input, the output
-#'   is always a dense matrix since the residuals transformation is not sparsity preserving.
+#'   Note that even though sparse Matrix objects are accepted as input,
+#'   they are internally coerced to dense matrix before processing,
+#'   because the output
+#'   is always a dense matrix since the residuals transformation 
+#'   is not sparsity preserving.
 #'   To avoid memory issues, it is recommended to perform feature selection first and
 #'   subset the number of features to a smaller size prior to computing the residuals.
 #'   
@@ -118,10 +120,10 @@ setMethod(f = "nullResiduals",
 		                            type=c("deviance","pearson"),
 		                            batch=NULL){
 		        fam<-match.arg(fam); type<-match.arg(type)
-		  	    m <- assay(object, assay)
+		  	    m <- as.matrix(assay(object, assay))
 		  	    name<-paste(fam,type,"residuals",sep="_")
 		  	    assay(object,name)<-null_residuals_batch(m,fam,type,batch)
-		  	    return(object)
+		  	    object
           })	
 
 #' @rdname nullResiduals
@@ -132,5 +134,16 @@ setMethod(f = "nullResiduals",
 		                        type=c("deviance","pearson"),
 		                        batch=NULL){
 		    fam<-match.arg(fam); type<-match.arg(type)
-		    return(null_residuals_batch(object,fam,type,batch))
+		    null_residuals_batch(object,fam,type,batch)
 		  })
+
+#' @rdname nullResiduals
+#' @export
+setMethod(f = "nullResiduals",
+          signature = signature(object = "Matrix"),
+          definition = function(object,fam = c("binomial", "poisson"),
+                                type=c("deviance","pearson"),
+                                batch=NULL){
+              fam<-match.arg(fam); type<-match.arg(type)
+              null_residuals_batch(as.matrix(object),fam,type,batch)
+          })
