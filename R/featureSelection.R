@@ -11,12 +11,13 @@ binomial_deviance<-function(x,p,n){
   2*(term1+term2)
 }
 
+#' @importFrom Matrix t
 compute_deviance<-function(m,fam=c("binomial","poisson")){
   #m a data matrix with genes=rows
   fam<-match.arg(fam)
   sz<-compute_size_factors(m,fam)
   sz_sum<-sum(sz)
-  m<-t(m) #column slicing faster than row slicing for matrix in R.
+  m<-Matrix::t(m) #column slicing faster than row slicing for matrix in R.
   #note: genes are now in the COLUMNS of m
   dev_binom<-function(g){
     x<-m[,g]
@@ -105,9 +106,11 @@ setMethod(f = "devianceFeatureSelection",
             fam<-match.arg(fam)
             m <- assay(object, assay)
             dev<-compute_deviance_batch(m, fam, batch)
-            name<-paste(fam, "residuals", sep="_")
-            rowData(object)<-cbind(rowData(object), name=dev)
-            if(nkeep>=length(dev)){ nkeep<-NULL } #user wants to keep all features
+            name<-paste(fam, "deviance", sep="_")
+            rd<-rowData(object)
+            rd[name]<-dev
+            rowData(object)<-rd
+            if(!is.null(nkeep) && nkeep>=length(dev)){ nkeep<-NULL } #user wants to keep all features
             if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are taking a subset of rows
             if(sorted){ 
               o<-order(dev,decreasing=TRUE)
