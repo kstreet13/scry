@@ -37,6 +37,7 @@ compute_deviance<-function(m,fam=c("binomial","poisson")){
 compute_deviance_batch<-function(m,fam=c("binomial","poisson"),batch=NULL){
   #deviance but with batch indicator (batch=a factor)
   fam<-match.arg(fam)
+  stopifnot(is.null(batch) || is(batch,"factor"))
   if(is.null(batch)){
     return(compute_deviance(m,fam=fam))
   } else { #case where there is more than one batch

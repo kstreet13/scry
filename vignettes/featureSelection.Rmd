@@ -1,0 +1,81 @@
+---
+title: "Feature Selection with Deviance"
+author: "Will Townes"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Feature Selection with Deviance}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r}
+library(ggplot2); theme_set(theme_bw())
+require(scry)
+```
+
+A typical single cell dataset has a large number of features that may not be informative about differences between biological groups (such as cell types). To identify the most informative features, we compute a deviance statistic for each gene. Genes with high deviance are poorly fit by an intercept-only model, indicating they are likely to be informative about biological variability. Note that our intercept-only model automatically adjusts for differences in total counts for each observation (cell) and can optionally also adjust for membership in different batches. 
+
+We illustrate this functionality using a small simulated dataset. We create two biological groups (clusters) of 50 cells each. There are 26 total genes and of these we set 3 to be differentially expressed across clusters.  An additional 6 genes are altered by a batch effect across two batches. Each batch has an equal number of cells from the biological clusters. A successful feature selection will rank the "biologically informative" (differentially expressed) genes higher than the 6 batch effect genes or the 17 uninformative genes.
+
+```{r}
+set.seed(101)
+ncells<- 100
+ngenes<- 26
+ngenes_de<- 3
+ngenes_batch<- 6
+mu0<-.2 #most genes lowly expressed
+mu<-matrix(mu0,nrow=ngenes,ncol=ncells)
+rownames(mu)<-LETTERS
+var_genes<-sample(rownames(mu),ngenes_de+ngenes_batch)
+de_genes<-var_genes[1:ngenes_de]
+batch_genes<-var_genes[(ngenes_de+1):length(var_genes)]
+#create some biologically informative genes
+#mu[de_genes,]<-.8*mu0
+mu[de_genes,1:50]<-4*mu0
+cl_id<-rep("clust2",ncol(mu))
+cl_id[1:50]<-"clust1"
+#introduce batch effect
+batch<-rep("batch_B",ncells)
+odds<-seq_along(batch)%%2==1
+batch[odds]<-"batch_A"
+mu[batch_genes,]<-.5*mu0
+mu[batch_genes,odds]<-4*mu0
+m<-matrix(rpois(length(mu),mu),nrow=nrow(mu))
+```
+
+### Deviance feature selection ignoring batch effect
+
+The matrix m represents a simulated count data with features in rows ("genes") and observations in columns ("cells"). Our goal is to find the differentially expressed features and avoid the false positives from the batch effect. Note that the batch effect is a fold change of 8x whereas the biological effect is a fold change of 4x.
+
+```{r fig.width=6, fig.height=4}
+d<-devianceFeatureSelection(m)
+pd<-data.frame(deviance=d,gene_type="uninformative",stringsAsFactors=FALSE)
+rownames(pd)<-rownames(mu)
+pd[de_genes,"gene_type"]<-"biological_informative"
+pd[batch_genes,"gene_type"]<-"batch_effect"
+o<-order(pd$deviance,decreasing=TRUE)
+pd<-pd[o,]
+pd$gene<-factor(rownames(pd),levels=rownames(pd))
+ggplot(pd,aes(x=gene,y=deviance,fill=gene_type))+geom_bar(stat="identity")+ggtitle("Deviance feature selection ignoring batch labels")
+```
+
+In the graph, the genes are sorted in decreasing order of deviance. So, the genes predicted to be most informative are on the left. Since we did not use the batch labels, deviance feature selection thinks that both batch effect genes and the biological genes are informative, as expected. Note that generally speaking the uninformative genes have lower deviance. 
+
+### Deviance feature selection adjusting for batch effect
+
+Now we include the batch labels and see if this separates the biological genes from the batch effect genes.
+
+```{r fig.width=6, fig.height=4}
+d<-devianceFeatureSelection(m,batch=factor(batch))
+pd<-data.frame(deviance=d,gene_type="uninformative",stringsAsFactors=FALSE)
+rownames(pd)<-rownames(mu)
+pd[de_genes,"gene_type"]<-"biological_informative"
+pd[batch_genes,"gene_type"]<-"batch_effect"
+o<-order(pd$deviance,decreasing=TRUE)
+pd<-pd[o,]
+pd$gene<-factor(rownames(pd),levels=rownames(pd))
+ggplot(pd,aes(x=gene,y=deviance,fill=gene_type))+geom_bar(stat="identity")+ggtitle("Deviance feature selection adjusting for batch labels")
+```
+
+By adjusting for batch labels, this reduces the deviance of the associated genes and ensures the biologically informative genes are ranked as having the highest deviance.
