@@ -36,3 +36,16 @@ setGeneric(
 		standardGeneric("nullResiduals")
 	}
 )
+
+#' @title Predict cell type
+#' @rdname predictType
+#' @param ... for the generic, additional arguments to pass to object-specific
+#'   methods.
+#' @export
+setGeneric(
+	name = "predictType",
+	signature = 'target',
+	def = function(target, ...) {
+		standardGeneric("predictType")
+	}
+)
