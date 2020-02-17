@@ -26,3 +26,5 @@ NEWS\.md
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^codecov\.yml$
+^doc$
+^Meta$

@@ -23,7 +23,9 @@ Imports:
 Suggests:
     knitr,
     testthat,
-    covr
+    covr,
+    rmarkdown,
+    ggplot2
 VignetteBuilder: knitr
 LazyData: false
 BugReports: https://github.com/kstreet/untitled_singlecell/issues

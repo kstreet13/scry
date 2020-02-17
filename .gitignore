@@ -39,3 +39,6 @@ rsconnect/
 
 # Mac artifacts
 *.DS_Store
+inst/doc
+doc
+Meta
