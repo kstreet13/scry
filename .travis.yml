@@ -1,0 +1,14 @@
+language: r
+r:
+  - bioc-release
+  - bioc-devel
+
+env:
+  - CODECOV_TOKEN="0f221319-91d1-46a5-94dc-e274b9a6e529"
+
+r_packages:
+  - covr
+
+## Run code coverage after successful build
+after_success:
+  - Rscript -e 'library(covr); codecov()'

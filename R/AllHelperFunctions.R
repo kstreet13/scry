@@ -77,7 +77,7 @@ compute_size_factors<-function(m,fam=c("binomial","poisson")){
   data <- rowSums(process[[1]])
   m <- ifelse(data>=quantile(data,0.75),2,3)
   m <- ifelse(data<=quantile(data,0.25),1,m)
-  model <- jags.model(textConnection(model_string), inits = list(m = m),
+  model <- jags.model(textConnection(.model_string), inits = list(m = m),
                       data = list(Y = data, N = sum(data), n = length(data),
                                   Zeros = rep(0, process[[2]]),
                                   nk = process[[2]], mx = max(data)))

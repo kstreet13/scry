@@ -13,7 +13,9 @@ Depends:
     stats,
     methods
 Imports:
+    BiocGenerics,
     glmpca,
+    rjags,
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment,
