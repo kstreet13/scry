@@ -146,3 +146,12 @@ test_that("nullResiduals works with intended input types", {
 	#check SCE output equivalent to matrix output
 	expect_equivalent(assay(outSCE,"binomial_deviance_residuals"),outU)
 })
+
+test_that("Cell type prediction works with intended input types", {
+	# make/import toy data
+	
+	# run predictType on toy data
+	
+	# check validity of outputs
+	
+})
