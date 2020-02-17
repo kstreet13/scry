@@ -12,6 +12,7 @@
 #' 
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment colData<-
+#' @importFrom BiocGenerics counts
 #' @export
 setMethod(f = "predictType",
 		  signature = signature(target = "SummarizedExperiment"),
