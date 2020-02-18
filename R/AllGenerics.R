@@ -4,11 +4,11 @@
 #'   methods.
 #' @export
 setGeneric(
-  name = "devianceFeatureSelection",
-  signature = 'object',
-  def = function(object, ...) {
-    standardGeneric("devianceFeatureSelection")
-  }
+	name = "devianceFeatureSelection",
+	signature = 'object',
+	def = function(object, ...) {
+		standardGeneric("devianceFeatureSelection")
+	}
 )
 
 #' @title Generalized principal components analysis for non-normally distributed data

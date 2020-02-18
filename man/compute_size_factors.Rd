@@ -21,8 +21,8 @@ Computes a size factor for each observation (column) of a
   count data matrix based on an approximate multinomial model.
 }
 \details{
-Both fam options are approximations to a multinomial model. Size factors
-  for binomial are simply the column sums (total counts for each sample). For
-  Poisson, the size factors are given by the column sums after rescaling to
-  have geometric mean of one. This improves numerical stability.
+Both fam options are approximations to a multinomial model. Size
+  factors for binomial are simply the column sums (total counts for each
+  sample). For Poisson, the size factors are given by the column sums after
+  rescaling to have geometric mean of one. This improves numerical stability.
 }
