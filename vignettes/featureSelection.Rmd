@@ -111,3 +111,18 @@ ggplot(pd,aes(x=gene,y=deviance,fill=gene_type))+
 By adjusting for batch labels, this reduces the deviance of the associated genes
 and ensures the biologically informative genes are ranked as having the highest
 deviance.
+
+## Alternative feature selection methods
+
+Other methods include selecting genes based on coefficient of variation 
+("highly variable genes") and/or highly expressed genes- those with a high
+average expression. For an exploration of the behavior of 
+deviance versus these alternatives, please refer to the 
+[Genome Biology paper](https://doi.org/10.1186/s13059-019-1861-6).
+Code to reproduce figure S6 is available in the 
+[scrna2019](https://github.com/willtownes/scrna2019/blob/master/simulations/genefilter.Rmd)
+github repository.
+
+An independent comparison of feature selection methods including deviance 
+is provided by [pipecomp](https://doi.org/10.1101/2020.02.02.930578), which
+found deviance to be effective in a variety of single-cell datasets.
