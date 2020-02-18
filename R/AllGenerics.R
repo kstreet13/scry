@@ -11,7 +11,8 @@ setGeneric(
 	}
 )
 
-#' @title Generalized principal components analysis for non-normally distributed data
+#' @title Generalized principal components analysis for non-normally distributed
+#'   data
 #' @rdname GLMPCA
 #' @param ... for the generic, additional arguments to pass to object-specific
 #'   methods.

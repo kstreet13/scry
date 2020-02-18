@@ -18,8 +18,7 @@ Imports:
     rjags,
     Matrix,
     SingleCellExperiment,
-    SummarizedExperiment,
-    MASS
+    SummarizedExperiment
 Suggests:
     knitr,
     testthat,

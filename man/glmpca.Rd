@@ -4,7 +4,8 @@
 \alias{GLMPCA}
 \alias{GLMPCA,SummarizedExperiment-method}
 \alias{GLMPCA,matrix-method}
-\title{Generalized principal components analysis for non-normally distributed data}
+\title{Generalized principal components analysis for non-normally distributed
+  data}
 \usage{
 GLMPCA(object, ...)
 

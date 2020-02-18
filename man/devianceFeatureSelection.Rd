@@ -23,55 +23,60 @@ devianceFeatureSelection(object, ...)
 \S4method{devianceFeatureSelection}{Matrix}(object, fam = c("binomial", "poisson"), batch = NULL)
 }
 \arguments{
-\item{object}{an object inheriting from \link{SummarizedExperiment} 
-(such as \code{\link{SingleCellExperiment}}). 
-Alternatively, a matrix or sparse Matrix of integer counts.}
+\item{object}{an object inheriting from \link{SummarizedExperiment} (such as
+\code{\link{SingleCellExperiment}}). Alternatively, a matrix or sparse
+Matrix of integer counts.}
 
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
 
-\item{assay}{a string or integer specifying which assay contains the count data
-(default = 1). Ignored if \code{object} is a matrix or sparse Matrix.}
+\item{assay}{a string or integer specifying which assay contains the count
+data (default = 1). Ignored if \code{object} is a matrix or sparse Matrix.}
 
-\item{fam}{a string specifying the model type to be used for calculating
-the residuals. Binomial (the default) is the closest approximation to multinomial, 
-but Poisson may be faster to compute and often is very similar to binomial.}
+\item{fam}{a string specifying the model type to be used for calculating the
+residuals. Binomial (the default) is the closest approximation to
+multinomial, but Poisson may be faster to compute and often is very similar
+to binomial.}
 
-\item{batch}{an optional factor indicating batch membership of observations. If provided,
-the null model is computed within each batch separately to regress out the batch
-effect from the resulting deviance statistics.}
+\item{batch}{an optional factor indicating batch membership of observations.
+If provided, the null model is computed within each batch separately to
+regress out the batch effect from the resulting deviance statistics.}
 
-\item{nkeep}{integer, how many informative features should be retained? 
-Default: all features are retained if set to NULL.
-Ignored if \code{object} is a matrix or sparse Matrix.}
+\item{nkeep}{integer, how many informative features should be retained?
+Default: all features are retained if set to NULL. Ignored if \code{object}
+is a matrix or sparse Matrix.}
 
-\item{sorted}{logical, should the \code{object} be returned with rows sorted in decreasing
-order of deviance? Default: FALSE, unless nkeep is specified, in which case it is forced 
-to be TRUE. Ignored for matrix and sparse Matrix inputs.}
+\item{sorted}{logical, should the \code{object} be returned with rows sorted
+in decreasing order of deviance? Default: FALSE, unless nkeep is specified,
+in which case it is forced to be TRUE. Ignored for matrix and sparse Matrix
+inputs.}
 }
 \value{
 The original \code{SingleCellExperiment} or
-  \code{SummarizedExperiment} object with the deviance statistics for each feature appended to
-  the rowData. The new column name will be either binomial_deviance or poisson_deviance. 
-  If the input was a matrix or sparse Matrix, output is a numeric vector 
-  containing the deviance statistics for each row.
+  \code{SummarizedExperiment} object with the deviance statistics for each
+  feature appended to the rowData. The new column name will be either
+  binomial_deviance or poisson_deviance. If the input was a matrix or sparse
+  Matrix, output is a numeric vector containing the deviance statistics for
+  each row.
 }
 \description{
-Computes a deviance statistic for each row feature (such as a gene) for count data 
-  based on a multinomial null model that assumes each feature has a constant rate.
-  Features with large deviance are likely to be informative. Uninformative, low deviance features
-  can be discarded to speed up downstream analyses and reduce memory footprint.
+Computes a deviance statistic for each row feature (such as a
+  gene) for count data based on a multinomial null model that assumes each
+  feature has a constant rate. Features with large deviance are likely to be
+  informative. Uninformative, low deviance features can be discarded to speed
+  up downstream analyses and reduce memory footprint.
 }
 \details{
-In a typical single-cell analysis, many of the features (genes) may not be 
-  informative about differences between observations (cells). Feature selection seeks to identify 
-  which genes are the most informative. We define an informative gene as one that is poorly fit
-  by a multinomial model of constant expression across cells within each batch. 
-  We compute a deviance statistic for each gene. Genes with high deviance are more informative.
+In a typical single-cell analysis, many of the features (genes) may
+  not be informative about differences between observations (cells). Feature
+  selection seeks to identify which genes are the most informative. We define
+  an informative gene as one that is poorly fit by a multinomial model of
+  constant expression across cells within each batch. We compute a deviance
+  statistic for each gene. Genes with high deviance are more informative.
 }
 \references{
-Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019).
-  Feature Selection and Dimension Reduction for Single Cell RNA-Seq based on a Multinomial Model.
-  \emph{Genome Biology}
-  \url{https://doi.org/10.1186/s13059-019-1861-6}
+Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019). Feature
+Selection and Dimension Reduction for Single Cell RNA-Seq based on a
+Multinomial Model. \emph{Genome Biology}
+\url{https://doi.org/10.1186/s13059-019-1861-6}
 }
