@@ -3,6 +3,8 @@ r:
   - bioc-release
   - bioc-devel
 
+warnings_are_errors: false
+
 env:
   - CODECOV_TOKEN="0f221319-91d1-46a5-94dc-e274b9a6e529"
 
