@@ -10,3 +10,4 @@ Including:
  - GLM-PCA for dimension reduction
  - Null residuals, a transformation that when combined with PCA approximates GLM-PCA
  - Quasi-UMI normalization for single-cell read counts
+ - Cell type prediction for scRNA-seq
