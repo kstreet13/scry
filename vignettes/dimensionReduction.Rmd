@@ -15,11 +15,11 @@ vignette: >
 library(ggplot2); theme_set(theme_bw())
 require(scry)
 
-pca<-function(Y,L=2,center=TRUE,scale=TRUE){
+pca <- function(Y, L = 2, center = TRUE, scale = TRUE){
   #assumes features=rows, observations=cols
-  res<-prcomp(as.matrix(t(Y)),center=center,scale.=scale,rank.=L)
-  factors<-as.data.frame(res$x)
-  colnames(factors)<-paste0("dim",1:L)
+  res <- prcomp(as.matrix(t(Y)), center = center, scale. = scale, rank. = L)
+  factors <- as.data.frame(res$x)
+  colnames(factors) <- paste0("dim", 1:L)
   factors
 }
 ```
@@ -61,22 +61,23 @@ rownames(counts) <- paste("gene", seq(nrow(counts)), sep = "_")
 colnames(counts) <- paste("cell", seq(ncol(counts)), sep = "_")
 # clean up rows
 Y <- counts[rowSums(counts) > 0, ]
-sz<-colSums(Y)
-Ycpm<-1e6*t(t(Y)/sz)
-Yl2<-log2(1+Ycpm)
-z<-log10(sz)
-pz<-1-colMeans(Y>0)
-cm<-data.frame(total_counts=sz,zero_frac=pz,clust=factor(cl_id),batch=factor(batch))
+sz <- colSums(Y)
+Ycpm <- 1e6 * t(t(Y)/sz)
+Yl2 <- log2(1+Ycpm)
+z <- log10(sz)
+pz <- 1 - colMeans(Y>0)
+cm <- data.frame(total_counts = sz, zero_frac = pz,
+                 clust = factor(cl_id), batch = factor(batch))
 ```
 
 Here we compute the approximate multinomial null residuals. There are two types
-of residuals, "Pearson" and "deviance". We also adjust for the batch labels
+of residuals, "Pearson" and "deviance." We also adjust for the batch labels
 when computing the residuals. Null residuals are fast to compute.
 
 ```{r}
-elapsed<-system.time({
-    Ypr<-nullResiduals(Y,type="pearson",batch=factor(batch))
-    Ydr<-nullResiduals(Y,type="deviance",batch=factor(batch))
+elapsed <- system.time({
+    Ypr <- nullResiduals(Y, type = "pearson", batch = factor(batch))
+    Ydr <- nullResiduals(Y, type = "deviance", batch = factor(batch))
 })
 print(elapsed)
 ```
@@ -88,29 +89,29 @@ Here, we also apply PCA to log2(1+CPM) which is a commonly used normalization
 with less desirable properties than null residuals.
 
 ```{r}
-res<-list()
-res[[1]]<-cbind(cm,method="pca_rp",pca(Ypr,2))
-res[[2]]<-cbind(cm,method="pca_rd",pca(Ydr,2))
-res[[3]]<-cbind(cm,method="pca_log",pca(Yl2,2))
+res <- list()
+res[[1]] <- cbind(cm, method = "pca_rp", pca(Ypr,2))
+res[[2]] <- cbind(cm, method = "pca_rd", pca(Ydr,2))
+res[[3]] <- cbind(cm, method = "pca_log", pca(Yl2,2))
 ```
 
 Next we compute the GLM-PCA dimension reduction, which also allows for batch
 adjustment. GLM-PCA is an iterative algorithm so it takes longer than
-null residuals. It requires not normalization or transformation, operating on
+null residuals. It requires no normalization or transformation, operating on
 the original counts matrix.
 
 ```{r}
-elapsed<-system.time(
-    glmpca_res<-GLMPCA(Y,L=2,X=model.matrix(~factor(batch)))
+elapsed <- system.time(
+    glmpca_res <- GLMPCA(Y, L = 2, X = model.matrix(~factor(batch)))
 )
-res[[4]]<-cbind(cm,method="glmpca",glmpca_res$factors)
+res[[4]] <- cbind(cm, method = "glmpca", glmpca_res$factors)
 print(elapsed)
 ```
 
-combine all the results to compare in a plot
+Combine all the results to compare in a plot:
 
 ```{r fig.width=6, fig.height=4}
-pd<-do.call(rbind,res)
+pd <- do.call(rbind, res)
 ggplot(pd,aes(x=dim1,y=dim2,colour=clust,shape=batch))+geom_point(size=2)+
     facet_wrap(~method,scales="free")
 ```
