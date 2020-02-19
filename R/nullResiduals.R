@@ -36,16 +36,20 @@ null_residuals<-function(m,fam=c("binomial","poisson"),type=c("deviance","pearso
     phat<-rowSums(m)/sum(sz)
     if(type=="deviance"){
       return(binomial_deviance_residuals(m,phat,sz))
-    } else { #deviance residuals
+    } else { #pearson residuals
       mhat<-outer(phat,sz)
-      return((m-mhat)/sqrt(mhat*(1-phat)))
+      res<-(m-mhat)/sqrt(mhat*(1-phat))
+      res[is.na(res)]<-0 #case of 0/0
+      return(res)
     }
   } else { #fam=="poisson"
     mhat<-outer(rowSums(m)/sum(sz), sz) #first argument is "lambda hat" (MLE)
     if(type=="deviance"){ 
       return(poisson_deviance_residuals(m,mhat))
     } else { #pearson residuals
-      return((m-mhat)/sqrt(mhat))
+      res<-(m-mhat)/sqrt(mhat)
+      res[is.na(res)]<-0 #case of 0/0
+      return(res)
     }
   } 
 }
@@ -56,7 +60,7 @@ null_residuals_batch<-function(m,fam=c("binomial","poisson"),type=c("deviance","
   if(is.null(batch)){
     return(null_residuals(m,fam=fam,type=type))
   } else { #case where there is more than one batch
-    stopifnot(length(batch)==ncol(m))
+    stopifnot(length(batch)==ncol(m) && is(batch,"factor"))
     res<-matrix(0.0,nrow=nrow(m),ncol=ncol(m))
     for(b in levels(batch)){
       idx<-(batch==b)
