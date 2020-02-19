@@ -27,6 +27,6 @@ Suggests:
     ggplot2
 VignetteBuilder: knitr
 LazyData: false
-BugReports: https://github.com/kstreet/scry/issues
+BugReports: https://github.com/kstreet13/scry/issues
 RoxygenNote: 7.0.2
 Encoding: UTF-8
