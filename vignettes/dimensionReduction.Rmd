@@ -1,0 +1,123 @@
+---
+title: "Dimension Reduction with GLM-PCA and Null Residuals Approximation"
+author: "Will Townes"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  BiocStyle::html_document:
+    toc: false
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Dimension Reduction with GLM-PCA and Null Residuals Approximation}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r}
+library(ggplot2); theme_set(theme_bw())
+require(scry)
+
+pca<-function(Y,L=2,center=TRUE,scale=TRUE){
+  #assumes features=rows, observations=cols
+  res<-prcomp(as.matrix(t(Y)),center=center,scale.=scale,rank.=L)
+  factors<-as.data.frame(res$x)
+  colnames(factors)<-paste0("dim",1:L)
+  factors
+}
+```
+
+## Comparing effectiveness of GLM-PCA and null residuals approximation
+
+We create two clusters of artificial cell types which are driven by a small 
+number of differentially expressed genes. There are two batches driven by 
+a large number of batch effect genes. Finally, many noise genes are simply lowly 
+expressed across all cells.
+
+We want to identify the clusters and avoid false positives from the batch
+effect. We will compare GLM-PCA, PCA on null residuals, and PCA on log-CPM.
+
+```{r}
+set.seed(101)
+ncells <- 100
+ngenes <- 1000
+ngenes_de <- 50
+ngenes_batch <- 500
+mu0 <- 0.2 #most genes are lowly expressed
+mu <- matrix(mu0, nrow = ngenes, ncol = ncells)
+var_genes <- sample.int(nrow(mu), ngenes_de + ngenes_batch)
+de_genes <- var_genes[1:ngenes_de]
+batch_genes <- var_genes[(ngenes_de+1):length(var_genes)]
+#create some biologically informative genes
+#mu[de_genes,] <- 0.8 * mu0
+mu[de_genes,1:50] <- 4 * mu0
+cl_id <- rep("clust2", ncol(mu))
+cl_id[1:50] <- "clust1"
+#introduce batch effect
+batch <- rep("batch_B", ncells)
+odds <- seq_along(batch) %% 2 == 1
+batch[odds] <- "batch_A"
+mu[batch_genes,] <- 0.5 * mu0
+mu[batch_genes,odds] <- 4 * mu0
+counts <- matrix(rpois(length(mu), mu), nrow = nrow(mu))
+rownames(counts) <- paste("gene", seq(nrow(counts)), sep = "_")
+colnames(counts) <- paste("cell", seq(ncol(counts)), sep = "_")
+# clean up rows
+Y <- counts[rowSums(counts) > 0, ]
+sz<-colSums(Y)
+Ycpm<-1e6*t(t(Y)/sz)
+Yl2<-log2(1+Ycpm)
+z<-log10(sz)
+pz<-1-colMeans(Y>0)
+cm<-data.frame(total_counts=sz,zero_frac=pz,clust=factor(cl_id),batch=factor(batch))
+```
+
+Here we compute the approximate multinomial null residuals. There are two types
+of residuals, "Pearson" and "deviance". We also adjust for the batch labels
+when computing the residuals. Null residuals are fast to compute.
+
+```{r}
+elapsed<-system.time({
+    Ypr<-nullResiduals(Y,type="pearson",batch=factor(batch))
+    Ydr<-nullResiduals(Y,type="deviance",batch=factor(batch))
+})
+print(elapsed)
+```
+
+The null residuals are just a transformation of the original data that attempts
+to remove variability due to multinomial sampling and batch effects. We can 
+apply standard PCA to them just like any other normalized or transformed data.
+Here, we also apply PCA to log2(1+CPM) which is a commonly used normalization
+with less desirable properties than null residuals.
+
+```{r}
+res<-list()
+res[[1]]<-cbind(cm,method="pca_rp",pca(Ypr,2))
+res[[2]]<-cbind(cm,method="pca_rd",pca(Ydr,2))
+res[[3]]<-cbind(cm,method="pca_log",pca(Yl2,2))
+```
+
+Next we compute the GLM-PCA dimension reduction, which also allows for batch
+adjustment. GLM-PCA is an iterative algorithm so it takes longer than
+null residuals. It requires not normalization or transformation, operating on
+the original counts matrix.
+
+```{r}
+elapsed<-system.time(
+    glmpca_res<-GLMPCA(Y,L=2,X=model.matrix(~factor(batch)))
+)
+res[[4]]<-cbind(cm,method="glmpca",glmpca_res$factors)
+print(elapsed)
+```
+
+combine all the results to compare in a plot
+
+```{r fig.width=6, fig.height=4}
+pd<-do.call(rbind,res)
+ggplot(pd,aes(x=dim1,y=dim2,colour=clust,shape=batch))+geom_point(size=2)+
+    facet_wrap(~method,scales="free")
+```
+
+We can see that GLM-PCA does the best job of separating the clusters while 
+avoiding the batch effect. The null residuals (Pearson in top left and deviance
+in top right) also correctly separate clusters in the first PC, however the 
+separation is not as clean as GLM-PCA. PCA on log-CPM however identifies the 
+batch effect as the primary axis of variation, which would lead downstream
+clustering algorithms to identify incorrect clusters.
