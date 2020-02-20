@@ -10,18 +10,25 @@ predictType(target, ...)
 \S4method{predictType}{SummarizedExperiment}(target, reference_dfs, types)
 }
 \arguments{
-\item{target}{blah}
+\item{target}{A \code{\link{SummarizedExperiment}} object containing the
+single-cell data to be identified.}
 
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
 
-\item{reference_dfs}{}
+\item{reference_dfs}{A list of reference data fits, returned from the
+\code{fitType} function.}
 
-\item{types}{}
+\item{types}{A character vector indicating the cell type identity of each fit
+from \code{reference_dfs}, in order.}
 }
 \value{
-
+A vector of predicted cell type identities for each cell in
+  \code{target}. In addition, a new \code{predictedCellType} slot is added to
+  the \code{SummarizedExperiment} object indicating the cell type identities.
 }
 \description{
-
+This function predicts the identities of each cell in a
+  single-cell RNAseq dataset, based on reference data corresponding to each
+  potential cell type of interest.
 }

@@ -2,14 +2,21 @@
 
 
 #' @rdname predictType
-#' @description This function predicts the identities of each cell in a single-cell RNAseq dataset, based on reference data corresponding to each potential cell type of interest.  
-#' 
-#' @param target A \code{\link{SummarizedExperiment}} object containing the single-cell data to be identified. 
-#' @param reference_dfs A list of reference data fits, returned from the \code{fitType} function. 
-#' @param types A character vector indicating the cell type identity of each fit from \code{reference_dfs}, in order.
-#' 
-#' @return A vector of predicted cell type identities for each cell in \code{target}. In addition, a new \code{predictedCellType} slot is added to the \code{SummarizedExperiment} object indicating the cell type identities. 
-#' 
+#' @description This function predicts the identities of each cell in a
+#'   single-cell RNAseq dataset, based on reference data corresponding to each
+#'   potential cell type of interest.
+#'
+#' @param target A \code{\link{SummarizedExperiment}} object containing the
+#'   single-cell data to be identified.
+#' @param reference_dfs A list of reference data fits, returned from the
+#'   \code{fitType} function.
+#' @param types A character vector indicating the cell type identity of each fit
+#'   from \code{reference_dfs}, in order.
+#'
+#' @return A vector of predicted cell type identities for each cell in
+#'   \code{target}. In addition, a new \code{predictedCellType} slot is added to
+#'   the \code{SummarizedExperiment} object indicating the cell type identities.
+#'   
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment colData<-
 #' @importFrom BiocGenerics counts
@@ -30,14 +37,17 @@ setMethod(f = "predictType",
 		  })
 
 #' @rdname fitType
-#' @description This function fits a zero-inflated mixture model to reference single-cell RNAseq data consisting of entirely one cell type. 
+#' @description This function fits a zero-inflated mixture model to reference
+#'   single-cell RNA-seq data consisting of entirely one cell type.
 #'
-#' @param reference A \code{\link{SummarizedExperiment}} object containing the reference single-cell data.
+#' @param reference A \code{\link{SummarizedExperiment}} object containing the
+#'   reference single-cell data.
 #' @param iters The number of iterations used in MCMC. Defaults to 5000.
 #'
-#' @return A \code{data.frame}, where the first column contains the total number of counts of each gene observed across the entire dataset and the second column contains the mean parameter for each gene based on the model fit.
-#'
-#' @import rjags
+#' @return A \code{data.frame}, where the first column contains the total number
+#'   of counts of each gene observed across the entire dataset and the second
+#'   column contains the mean parameter for each gene based on the model fit.
+#'   
 #' @importFrom BiocGenerics counts
 #' @export
 setMethod(f = "fitType",

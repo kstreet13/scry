@@ -50,3 +50,16 @@ setGeneric(
 		standardGeneric("predictType")
 	}
 )
+
+#' @title Fit reference cell type model
+#' @rdname fitType
+#' @param ... for the generic, additional arguments to pass to object-specific
+#'   methods.
+#' @export
+setGeneric(
+	name = "fitType",
+	signature = 'reference',
+	def = function(reference, ...) {
+		standardGeneric("fitType")
+	}
+)
