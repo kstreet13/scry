@@ -30,3 +30,14 @@ LazyData: false
 BugReports: https://github.com/kstreet13/scry/issues
 RoxygenNote: 7.0.2
 Encoding: UTF-8
+biocViews:
+    Classification,
+    Clustering,
+    DimensionReduction,
+    GeneExpression,
+    Normalization,
+    RNASeq,
+    Software,
+    Sequencing,
+    SingleCell,
+    Transcriptomics
