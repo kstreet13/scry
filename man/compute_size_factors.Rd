@@ -26,3 +26,9 @@ Both fam options are approximations to a multinomial model. Size
   sample). For Poisson, the size factors are given by the column sums after
   rescaling to have geometric mean of one. This improves numerical stability.
 }
+\examples{
+ncells <- 100
+u <- matrix(rpois(20000, 5), ncol=ncells)
+compute_size_factors(u)
+
+}

@@ -32,56 +32,65 @@ nullResiduals(object, ...)
 )
 }
 \arguments{
-\item{object}{an object inheriting from \link{SummarizedExperiment} 
-(such as \code{\link{SingleCellExperiment}}). 
-Alternatively, a matrix of integer counts.}
+\item{object}{an object inheriting from \link{SummarizedExperiment} (such as
+\code{\link{SingleCellExperiment}}). Alternatively, a matrix of integer
+counts.}
 
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
 
-\item{assay}{a string or integer specifying which assay contains the count data
-(default = 1). Ignored if \code{object} is a matrix.}
+\item{assay}{a string or integer specifying which assay contains the count
+data (default = 1). Ignored if \code{object} is a matrix.}
 
-\item{fam}{a string specifying the model type to be used for calculating
-the residuals. Binomial (the default) is the closest approximation to multinomial, 
-but Poisson may be faster to compute and often is very similar to binomial.}
+\item{fam}{a string specifying the model type to be used for calculating the
+residuals. Binomial (the default) is the closest approximation to
+multinomial, but Poisson may be faster to compute and often is very similar
+to binomial.}
 
 \item{type}{should deviance or Pearson residuals be used?}
 
-\item{batch}{an optional factor indicating batch membership of observations. If provided,
-the null model is computed within each batch separately to regress out the batch
-effect from the resulting residuals.}
+\item{batch}{an optional factor indicating batch membership of observations.
+If provided, the null model is computed within each batch separately to
+regress out the batch effect from the resulting residuals.}
 }
 \value{
 The original \code{SingleCellExperiment} or
-  \code{SummarizedExperiment} object with the residuals appended as a new assay. 
-  The assay name will be fam_type_residuals (eg, binomial_deviance_residuals).
-  If the input was a matrix, output is a dense matrix containing
-  the residuals.
+  \code{SummarizedExperiment} object with the residuals appended as a new
+  assay. The assay name will be fam_type_residuals (eg,
+  binomial_deviance_residuals). If the input was a matrix, output is a dense
+  matrix containing the residuals.
 }
 \description{
-Computes deviance or Pearson residuals for count data based on
-  a multinomial null model that assumes each feature has a constant rate.
-  The residuals matrix can be analyzed with standard PCA as a fast approximation
+Computes deviance or Pearson residuals for count data based on a
+  multinomial null model that assumes each feature has a constant rate. The
+  residuals matrix can be analyzed with standard PCA as a fast approximation
   to GLM-PCA.
 }
 \details{
 This function should be used only on the un-normalized counts.
-  It was originally designed for single-cell RNA-seq counts 
-  obtained by the use of unique molecular identifiers (UMIs) and has not been 
-  tested on read count data without UMIs or other data types.
-  
-  Note that even though sparse Matrix objects are accepted as input,
-  they are internally coerced to dense matrix before processing,
-  because the output
-  is always a dense matrix since the residuals transformation 
-  is not sparsity preserving.
-  To avoid memory issues, it is recommended to perform feature selection first and
-  subset the number of features to a smaller size prior to computing the residuals.
+ It was originally designed for single-cell RNA-seq counts 
+ obtained by the use of unique molecular identifiers (UMIs) and has not been 
+ tested on read count data without UMIs or other data types.
+ 
+ Note that even though sparse Matrix objects are accepted as input, 
+ they are internally coerced to dense matrix before processing, 
+ because the output
+ is always a dense matrix since the residuals transformation 
+ is not sparsity preserving.
+ To avoid memory issues, it is recommended to perform feature selection first
+ and subset the number of features to a smaller size prior to computing the 
+ residuals.
+}
+\examples{
+ncells <- 100
+u <- matrix(rpois(20000, 5), ncol=ncells)
+sce <- SingleCellExperiment(assays=list(counts=u))
+nullResiduals(sce)
+
 }
 \references{
-Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019).
-  Feature Selection and Dimension Reduction for Single Cell RNA-Seq based on a Multinomial Model.
-  \emph{Genome Biology}
-  \url{https://doi.org/10.1186/s13059-019-1861-6}
+Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019). Feature
+Selection and Dimension Reduction for Single Cell RNA-Seq based on a
+Multinomial Model. \emph{Genome Biology}
+\url{https://doi.org/10.1186/s13059-019-1861-6}
 }

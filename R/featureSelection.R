@@ -101,6 +101,12 @@ compute_deviance_batch<-function(m,fam=c("binomial","poisson"),batch=NULL){
 #' Multinomial Model. \emph{Genome Biology}
 #' \url{https://doi.org/10.1186/s13059-019-1861-6}
 #' 
+#' @examples 
+#' ncells <- 100
+#' u <- matrix(rpois(20000, 5), ncol=ncells)
+#' sce <- SingleCellExperiment(assays=list(counts=u))
+#' devianceFeatureSelection(sce)
+#' 
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom SummarizedExperiment rowData<-
@@ -120,7 +126,8 @@ setMethod(f = "devianceFeatureSelection",
 		  	if(!is.null(nkeep) && nkeep>=length(dev)){
 		  		nkeep<-NULL
 		  	} #user wants to keep all features
-		  	if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are taking a subset of rows
+		  	if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are taking
+		  										#a subset of rows
 		  	if(sorted){ 
 		  		o<-order(dev,decreasing=TRUE)
 		  		object<-object[o,]
@@ -138,7 +145,8 @@ setMethod(f = "devianceFeatureSelection",
 #' @export
 setMethod(f = "devianceFeatureSelection",
 		  signature = signature(object = "matrix"),
-		  definition = function(object, fam = c("binomial", "poisson"), batch = NULL){
+		  definition = function(object, fam = c("binomial", "poisson"),
+		  					  batch = NULL){
 		  	fam<-match.arg(fam)
 		  	compute_deviance_batch(object,fam,batch)
 		  })
@@ -147,7 +155,8 @@ setMethod(f = "devianceFeatureSelection",
 #' @export
 setMethod(f = "devianceFeatureSelection",
 		  signature = signature(object = "Matrix"),
-		  definition = function(object, fam = c("binomial", "poisson"), batch = NULL){
+		  definition = function(object, fam = c("binomial", "poisson"),
+		  					  batch = NULL){
 		  	fam<-match.arg(fam)
 		  	compute_deviance_batch(object,fam,batch)
 		  })

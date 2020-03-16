@@ -15,6 +15,11 @@
 #'   sample). For Poisson, the size factors are given by the column sums after
 #'   rescaling to have geometric mean of one. This improves numerical stability.
 #' 
+#' @examples 
+#' ncells <- 100
+#' u <- matrix(rpois(20000, 5), ncol=ncells)
+#' compute_size_factors(u)
+#' 
 #' @importFrom Matrix colSums
 #' @export
 compute_size_factors<-function(m,fam=c("binomial","poisson")){
@@ -109,10 +114,10 @@ compute_size_factors<-function(m,fam=c("binomial","poisson")){
     genes <- intersect(rownames(df),rownames(target_df))
     df <- df[genes,]
     target_df <- target_df[genes,]
-    return(sapply(seq_len(ncol(target_df)), function(x) 
+    return(vapply(seq_len(ncol(target_df)), function(x) 
         sum(dpois(target_df[,x],
                   lambda = (df$mus)*sum(target_df[,x])/N,
-                  log=TRUE))))
+                  log=TRUE)), FUN.VALUE = 0))
 }
 
 

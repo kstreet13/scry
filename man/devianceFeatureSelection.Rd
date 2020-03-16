@@ -74,6 +74,13 @@ In a typical single-cell analysis, many of the features (genes) may
   constant expression across cells within each batch. We compute a deviance
   statistic for each gene. Genes with high deviance are more informative.
 }
+\examples{
+ncells <- 100
+u <- matrix(rpois(20000, 5), ncol=ncells)
+sce <- SingleCellExperiment(assays=list(counts=u))
+devianceFeatureSelection(sce)
+
+}
 \references{
 Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019). Feature
 Selection and Dimension Reduction for Single Cell RNA-Seq based on a

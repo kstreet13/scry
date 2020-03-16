@@ -41,6 +41,11 @@
 #'   the input was a matrix, output matches that of
 #'   \code{\link[glmpca]{glmpca}}.
 #'   
+#' @examples 
+#' ncells <- 100
+#' u <- matrix(rpois(20000, 5), ncol=ncells)
+#' sce <- SingleCellExperiment(assays=list(counts=u))
+#' GLMPCA(sce, L = 2)
 #' 
 #' @import glmpca
 #' @importFrom SingleCellExperiment reducedDim<-
