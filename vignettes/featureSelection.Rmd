@@ -70,7 +70,7 @@ fold change of 4x.
 ```{r fig.width=6, fig.height=4}
 d <- devianceFeatureSelection(m)
 pd <- data.frame(deviance = d, gene_type = "uninformative", 
-				 stringsAsFactors = FALSE)
+                 stringsAsFactors = FALSE)
 rownames(pd) <- rownames(mu)
 pd[de_genes, "gene_type"] <- "biological_informative"
 pd[batch_genes, "gene_type"] <- "batch_effect"
@@ -78,8 +78,8 @@ o <- order(pd$deviance, decreasing = TRUE)
 pd <- pd[o,]
 pd$gene <- factor(rownames(pd), levels = rownames(pd))
 ggplot(pd,aes(x=gene,y=deviance,fill=gene_type))+
-	geom_bar(stat="identity")+
-	ggtitle("Deviance feature selection ignoring batch labels")
+    geom_bar(stat="identity")+
+    ggtitle("Deviance feature selection ignoring batch labels")
 ```
 
 In the graph, the genes are sorted in decreasing order of deviance. So, the
@@ -96,7 +96,7 @@ from the batch effect genes.
 ```{r fig.width=6, fig.height=4}
 d <- devianceFeatureSelection(m, batch = factor(batch))
 pd <- data.frame(deviance = d, gene_type = "uninformative",
-				 stringsAsFactors = FALSE)
+                 stringsAsFactors = FALSE)
 rownames(pd) <- rownames(mu)
 pd[de_genes, "gene_type"] <- "biological_informative"
 pd[batch_genes, "gene_type"] <- "batch_effect"
@@ -104,8 +104,8 @@ o <- order(pd$deviance, decreasing = TRUE)
 pd <- pd[o,]
 pd$gene <- factor(rownames(pd), levels = rownames(pd))
 ggplot(pd,aes(x=gene,y=deviance,fill=gene_type))+
-	geom_bar(stat="identity")+
-	ggtitle("Deviance feature selection adjusting for batch labels")
+    geom_bar(stat="identity")+
+    ggtitle("Deviance feature selection adjusting for batch labels")
 ```
 
 By adjusting for batch labels, this reduces the deviance of the associated genes

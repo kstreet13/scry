@@ -5,21 +5,19 @@ Description: This package incorporates several analysis methods developed
             by members of the Irizarry lab.
 Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role = c("aut", "cre", "cph")),
-            person("Kelly", "Street", email = "street.kelly@gmail.com", role="aut"),
-            person("Isabella", "Grabski", email = "isabellagrabski@g.harvard.edu", role="aut"))
+            person("Kelly", "Street", email = "street.kelly@gmail.com", role="aut"))
 License: Artistic-2.0
 Depends:
     R (>= 3.6),
     stats,
     methods
 Imports:
-    BiocGenerics,
     glmpca,
-    rjags,
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment
 Suggests:
+    BiocGenerics,
     knitr,
     testthat,
     covr,
@@ -31,8 +29,6 @@ BugReports: https://github.com/kstreet13/scry/issues
 RoxygenNote: 7.0.2
 Encoding: UTF-8
 biocViews:
-    Classification,
-    Clustering,
     DimensionReduction,
     GeneExpression,
     Normalization,

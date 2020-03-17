@@ -84,7 +84,7 @@ This function should be used only on the un-normalized counts.
 \examples{
 ncells <- 100
 u <- matrix(rpois(20000, 5), ncol=ncells)
-sce <- SingleCellExperiment(assays=list(counts=u))
+sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 nullResiduals(sce)
 
 }

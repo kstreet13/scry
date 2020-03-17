@@ -44,7 +44,7 @@
 #' @examples 
 #' ncells <- 100
 #' u <- matrix(rpois(20000, 5), ncol=ncells)
-#' sce <- SingleCellExperiment(assays=list(counts=u))
+#' sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 #' GLMPCA(sce, L = 2)
 #' 
 #' @import glmpca
@@ -52,42 +52,42 @@
 #' @importFrom methods is
 #' @export
 setMethod(f = "GLMPCA",
-		  signature = signature(object = "SummarizedExperiment"),
-		  definition = function(object, assay = 1,
-		  					  L, fam=c("poi","nb","mult","bern"),
-		  					  ctl = list(maxIter=1000, eps=1e-4),
-		  					  penalty = 1, verbose = FALSE,
-		  					  init = list(factors=NULL, loadings=NULL),
-		  					  nb_theta = 1, X = NULL, Z = NULL, sz = NULL){
-		  	
-		  	res <- glmpca(Y = assay(object, assay),
-		  				  L = L, fam = fam, ctl = ctl, penalty = penalty,
-		  				  verbose = verbose, init = init, nb_theta = nb_theta,
-		  				  X = X, Z = Z, sz = sz)
-		  	
-		  	if(is(object, 'SingleCellExperiment')){
-		  		reducedDim(object, "GLMPCA") <- res$factors
-		  	}
-		  	object@metadata$glmpca <- res
-		  	return(object)
-		  })
+          signature = signature(object = "SummarizedExperiment"),
+          definition = function(object, assay = 1,
+                                L, fam=c("poi","nb","mult","bern"),
+                                ctl = list(maxIter=1000, eps=1e-4),
+                                penalty = 1, verbose = FALSE,
+                                init = list(factors=NULL, loadings=NULL),
+                                nb_theta = 1, X = NULL, Z = NULL, sz = NULL){
+              
+              res <- glmpca(Y = assay(object, assay),
+                            L = L, fam = fam, ctl = ctl, penalty = penalty,
+                            verbose = verbose, init = init, nb_theta = nb_theta,
+                            X = X, Z = Z, sz = sz)
+              
+              if(is(object, 'SingleCellExperiment')){
+                  reducedDim(object, "GLMPCA") <- res$factors
+              }
+              object@metadata$glmpca <- res
+              return(object)
+          })
 
 #' @rdname GLMPCA
 #' @importFrom glmpca glmpca
 #' @export
 setMethod(f = "GLMPCA",
-		  signature = signature(object = "matrix"),
-		  definition = function(object, assay = 1,
-		  					  L, fam=c("poi","nb","mult","bern"),
-		  					  ctl = list(maxIter=1000, eps=1e-4),
-		  					  penalty = 1, verbose = FALSE,
-		  					  init = list(factors=NULL, loadings=NULL),
-		  					  nb_theta = 1, X = NULL, Z = NULL, sz = NULL){
-		  	
-		  	res <- glmpca(Y = object,
-		  				  L = L, fam = fam, ctl = ctl, penalty = penalty,
-		  				  verbose = verbose, init = init, nb_theta = nb_theta,
-		  				  X = X, Z = Z, sz = sz)
-		  	
-		  	return(res)
-		  })
+          signature = signature(object = "matrix"),
+          definition = function(object, assay = 1,
+                                L, fam=c("poi","nb","mult","bern"),
+                                ctl = list(maxIter=1000, eps=1e-4),
+                                penalty = 1, verbose = FALSE,
+                                init = list(factors=NULL, loadings=NULL),
+                                nb_theta = 1, X = NULL, Z = NULL, sz = NULL){
+              
+              res <- glmpca(Y = object,
+                            L = L, fam = fam, ctl = ctl, penalty = penalty,
+                            verbose = verbose, init = init, nb_theta = nb_theta,
+                            X = X, Z = Z, sz = sz)
+              
+              return(res)
+          })

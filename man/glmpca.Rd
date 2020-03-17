@@ -100,7 +100,7 @@ The basic model is \code{R = AX\'+ZG\'+VU\'}, where \code{E\[Y\] = M
 \examples{
 ncells <- 100
 u <- matrix(rpois(20000, 5), ncol=ncells)
-sce <- SingleCellExperiment(assays=list(counts=u))
+sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 GLMPCA(sce, L = 2)
 
 }

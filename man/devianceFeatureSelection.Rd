@@ -77,7 +77,7 @@ In a typical single-cell analysis, many of the features (genes) may
 \examples{
 ncells <- 100
 u <- matrix(rpois(20000, 5), ncol=ncells)
-sce <- SingleCellExperiment(assays=list(counts=u))
+sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 devianceFeatureSelection(sce)
 
 }

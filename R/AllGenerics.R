@@ -4,11 +4,11 @@
 #'   methods.
 #' @export
 setGeneric(
-	name = "devianceFeatureSelection",
-	signature = 'object',
-	def = function(object, ...) {
-		standardGeneric("devianceFeatureSelection")
-	}
+    name = "devianceFeatureSelection",
+    signature = 'object',
+    def = function(object, ...) {
+        standardGeneric("devianceFeatureSelection")
+    }
 )
 
 #' @title Generalized principal components analysis for non-normally distributed
@@ -18,11 +18,11 @@ setGeneric(
 #'   methods.
 #' @export
 setGeneric(
-	name = "GLMPCA",
-	signature = 'object',
-	def = function(object, ...) {
-		standardGeneric("GLMPCA")
-	}
+    name = "GLMPCA",
+    signature = 'object',
+    def = function(object, ...) {
+        standardGeneric("GLMPCA")
+    }
 )
 
 #' @title Residuals from an approximate multinomial null model
@@ -31,35 +31,9 @@ setGeneric(
 #'   methods.
 #' @export
 setGeneric(
-	name = "nullResiduals",
-	signature = 'object',
-	def = function(object, ...) {
-		standardGeneric("nullResiduals")
-	}
-)
-
-#' @title Predict cell type
-#' @rdname predictType
-#' @param ... for the generic, additional arguments to pass to object-specific
-#'   methods.
-#' @export
-setGeneric(
-	name = "predictType",
-	signature = 'target',
-	def = function(target, ...) {
-		standardGeneric("predictType")
-	}
-)
-
-#' @title Fit reference cell type model
-#' @rdname fitType
-#' @param ... for the generic, additional arguments to pass to object-specific
-#'   methods.
-#' @export
-setGeneric(
-	name = "fitType",
-	signature = 'reference',
-	def = function(reference, ...) {
-		standardGeneric("fitType")
-	}
+    name = "nullResiduals",
+    signature = 'object',
+    def = function(object, ...) {
+        standardGeneric("nullResiduals")
+    }
 )

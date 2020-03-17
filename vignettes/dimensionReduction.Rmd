@@ -16,19 +16,19 @@ library(ggplot2); theme_set(theme_bw())
 require(scry)
 
 pca <- function(Y, L = 2, center = TRUE, scale = TRUE){
-  #assumes features=rows, observations=cols
-  res <- prcomp(as.matrix(t(Y)), center = center, scale. = scale, rank. = L)
-  factors <- as.data.frame(res$x)
-  colnames(factors) <- paste0("dim", 1:L)
-  factors
+    #assumes features=rows, observations=cols
+    res <- prcomp(as.matrix(t(Y)), center = center, scale. = scale, rank. = L)
+    factors <- as.data.frame(res$x)
+    colnames(factors) <- paste0("dim", 1:L)
+    factors
 }
 ```
 
 ## Comparing effectiveness of GLM-PCA and null residuals approximation
 
-We create two clusters of artificial cell types which are driven by a small 
-number of differentially expressed genes. There are two batches driven by 
-a large number of batch effect genes. Finally, many noise genes are simply lowly 
+We create two clusters of artificial cell types which are driven by a small
+number of differentially expressed genes. There are two batches driven by a
+large number of batch effect genes. Finally, many noise genes are simply lowly
 expressed across all cells.
 
 We want to identify the clusters and avoid false positives from the batch
