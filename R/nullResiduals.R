@@ -1,4 +1,5 @@
-binomial_deviance_residuals <- function(X, p, n){
+# Helper functions for nullResiduals
+.binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
     if(length(p) == nrow(X)){ 
@@ -18,7 +19,7 @@ binomial_deviance_residuals <- function(X, p, n){
     sign(X-mu)*sqrt(2*(term1+term2))
 }
 
-poisson_deviance_residuals <- function(x, xhat){
+.poisson_deviance_residuals <- function(x, xhat){
     #x, xhat assumed to be same dimension
     #sz <- exp(offsets)
     #xhat <- lambda*sz
@@ -28,7 +29,7 @@ poisson_deviance_residuals <- function(x, xhat){
     sign(x-xhat)*sqrt(abs(s2))
 }
 
-null_residuals <- function(m, fam = c("binomial", "poisson"), 
+.null_residuals <- function(m, fam = c("binomial", "poisson"), 
                            type = c("deviance", "pearson")){
     #m is a matrix
     fam <- match.arg(fam); type <- match.arg(type)
@@ -36,7 +37,7 @@ null_residuals <- function(m, fam = c("binomial", "poisson"),
     if(fam == "binomial") {
         phat <- rowSums(m)/sum(sz)
         if(type == "deviance"){
-            return(binomial_deviance_residuals(m, phat, sz))
+            return(.binomial_deviance_residuals(m, phat, sz))
         } else { #pearson residuals
             mhat <- outer(phat, sz)
             res <- (m-mhat)/sqrt(mhat*(1-phat))
@@ -47,7 +48,7 @@ null_residuals <- function(m, fam = c("binomial", "poisson"),
         mhat <- outer(rowSums(m)/sum(sz), sz) #first argument is
         #"lambda hat" (MLE)
         if(type == "deviance"){ 
-            return(poisson_deviance_residuals(m, mhat))
+            return(.poisson_deviance_residuals(m, mhat))
         } else { #pearson residuals
             res <- (m-mhat)/sqrt(mhat)
             res[is.na(res)] <- 0 #case of 0/0
@@ -56,18 +57,18 @@ null_residuals <- function(m, fam = c("binomial", "poisson"),
     } 
 }
 
-null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
+.null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
                                  type=c("deviance", "pearson"), batch=NULL){
     #null residuals but with batch indicator (batch=a factor)
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(batch)){
-        return(null_residuals(m, fam = fam, type = type))
+        return(.null_residuals(m, fam = fam, type = type))
     } else { #case where there is more than one batch
         stopifnot(length(batch) == ncol(m) && is(batch, "factor"))
         res <- matrix(0.0, nrow = nrow(m), ncol = ncol(m))
         for(b in levels(batch)){
             idx <- (batch == b)
-            res[, idx] <- null_residuals(m[, idx], fam = fam, type = type)
+            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type)
         }
         return(res)
     }
@@ -137,7 +138,7 @@ setMethod(f = "nullResiduals",
               fam <- match.arg(fam); type <- match.arg(type)
               m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
-              assay(object, name) <- null_residuals_batch(m, fam, type, batch)
+              assay(object, name) <- .null_residuals_batch(m, fam, type, batch)
               object
           })	
 
@@ -149,7 +150,7 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"), 
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              null_residuals_batch(object, fam, type, batch)
+              .null_residuals_batch(object, fam, type, batch)
           })
 
 #' @rdname nullResiduals
@@ -160,5 +161,5 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"), 
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              null_residuals_batch(as.matrix(object), fam, type, batch)
+              .null_residuals_batch(as.matrix(object), fam, type, batch)
           })
