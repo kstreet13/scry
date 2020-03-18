@@ -1,6 +1,6 @@
 Package: scry
 Title: Small-Count Analysis Methods from the Rafalab
-Version: 0.99.0
+Version: 0.99.1
 Description: This package incorporates several analysis methods developed
             by members of the Irizarry lab.
 Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
@@ -8,7 +8,7 @@ Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             person("Kelly", "Street", email = "street.kelly@gmail.com", role="aut"))
 License: Artistic-2.0
 Depends:
-    R (>= 3.6),
+    R (>= 4.0),
     stats,
     methods
 Imports:
