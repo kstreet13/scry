@@ -8,7 +8,7 @@ Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             person("Kelly", "Street", email = "street.kelly@gmail.com", role="aut"))
 License: Artistic-2.0
 Depends:
-    R (>= 4.0),
+    R (>= 3.5),
     stats,
     methods
 Imports:
