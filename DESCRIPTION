@@ -13,7 +13,7 @@ Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role="aut"))
 License: Artistic-2.0
 Depends:
-    R (>= 3.6),
+    R (>= 4.0),
     stats,
     methods
 Imports:
