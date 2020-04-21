@@ -5,7 +5,7 @@
 #' 
 #' @param m a matrix or sparse \code{\link{Matrix}} of integer count values.
 #' @param fam a string specifying the model type to be used for calculating
-#'   size factors.
+#'   size factors. Must be either 'binomial' or 'poisson'.
 #' 
 #' @return A vector of size factors with length equal to the number of columns
 #'   of \code{m}.

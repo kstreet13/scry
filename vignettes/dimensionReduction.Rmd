@@ -14,14 +14,6 @@ vignette: >
 ```{r}
 library(ggplot2); theme_set(theme_bw())
 require(scry)
-
-pca <- function(Y, L = 2, center = TRUE, scale = TRUE){
-    #assumes features=rows, observations=cols
-    res <- prcomp(as.matrix(t(Y)), center = center, scale. = scale, rank. = L)
-    factors <- as.data.frame(res$x)
-    colnames(factors) <- paste0("dim", 1:L)
-    factors
-}
 ```
 
 ## Comparing effectiveness of GLM-PCA and null residuals approximation
@@ -89,6 +81,13 @@ Here, we also apply PCA to log2(1+CPM) which is a commonly used normalization
 with less desirable properties than null residuals.
 
 ```{r}
+pca <- function(Y, L = 2, center = TRUE, scale = TRUE){
+    #assumes features=rows, observations=cols
+    res <- prcomp(as.matrix(t(Y)), center = center, scale. = scale, rank. = L)
+    factors <- as.data.frame(res$x)
+    colnames(factors) <- paste0("dim", 1:L)
+    factors
+}
 res <- list()
 res[[1]] <- cbind(cm, method = "pca_rp", pca(Ypr,2))
 res[[2]] <- cbind(cm, method = "pca_rd", pca(Ydr,2))

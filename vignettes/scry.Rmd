@@ -11,7 +11,7 @@ vignette: >
   %\usepackage[UTF-8]{inputenc}
 ---
 
-## Basic Workflow
+# Basic Workflow
 
 ```{r}
 suppressPackageStartupMessages(library(SingleCellExperiment))
@@ -29,17 +29,17 @@ sce<-sce_full_Zhengmix4eq()
 #cm<-as.data.frame(colData(sce))
 ```
 
-### Feature Selection with Deviance
+## Feature Selection with Deviance
 
 First we will rank genes based on deviance, to help identify the most
 biologically informative genes. The actual deviance values are stored in the
 rowData of the SingleCellExperiment object.
 
 ```{r fig.width=6, fig.height=4}
-sce<-devianceFeatureSelection(sce,assay="counts",sorted=TRUE)
-plot(rowData(sce)$binomial_deviance,type="l",xlab="ranked genes",
-     ylab="binomial deviance",main="Feature Selection with Deviance")
-abline(v=2000,lty=2,col="red")
+sce<-devianceFeatureSelection(sce, assay="counts", sorted=TRUE)
+plot(rowData(sce)$binomial_deviance, type="l", xlab="ranked genes",
+     ylab="binomial deviance", main="Feature Selection with Deviance")
+abline(v=2000, lty=2, col="red")
 ```
 
 We can see that the deviance drops sharply after about 2,000 genes. The
@@ -47,20 +47,20 @@ remaining genes are probably not informative so we discard them to speed up
 downstream analysis.
 
 ```{r}
-sce2<-sce[1:1000,]
+sce2<-sce[1:1000, ]
 ```
 
-### Dimension Reduction with GLM-PCA
+## Dimension Reduction with GLM-PCA
 
 GLM-PCA can reduce the dimensionality of UMI counts to facilitate visualization
 and/or clustering without needing any normalization.
 
 ```{r fig.width=6, fig.height=4}
 set.seed(101)
-sce2<-GLMPCA(sce2,assay="counts",2)
+sce2<-GLMPCA(sce2, assay="counts", 2)
 fit<-metadata(sce2)$glmpca
-pd<-cbind(as.data.frame(colData(sce2)),fit$factors)
-ggplot(pd,aes(x=dim1,y=dim2,colour=phenoid))+geom_point(size=.8)+
+pd<-cbind(as.data.frame(colData(sce2)), fit$factors)
+ggplot(pd, aes(x=dim1, y=dim2, colour=phenoid)) + geom_point(size=.8) +
   ggtitle("GLM-PCA applied to high deviance genes")
 ```
 
@@ -69,38 +69,38 @@ between naive cytotoxic and regulatory T-cells is less clear. Increasing the
 number of latent factors from 2 to 10 can improve resolution of biological
 clusters, but at the cost of slower computation.
 
-### Dimension Reduction with Null Residuals
+## Dimension Reduction with Null Residuals
 
 GLM-PCA can be slow for large datasets. A fast approximation is to fit a null
 model of constant expression for each gene across cells, then fit standard
 PCA to either the Pearson or deviance residuals from the null model.
 
 ```{r fig.width=6, fig.height=8}
-sce<-nullResiduals(sce,assay="counts",type="deviance")
-sce<-nullResiduals(sce,assay="counts",type="pearson")
-sce2<-sce[1:1000,] #use only the high deviance genes
-pca <- function(Y, L = 2, center = TRUE, scale = TRUE){
+sce<-nullResiduals(sce, assay="counts", type="deviance")
+sce<-nullResiduals(sce, assay="counts", type="pearson")
+sce2<-sce[1:1000, ] #use only the high deviance genes
+pca<-function(Y, L=2, center=TRUE, scale=TRUE){
     #assumes features=rows, observations=cols
-    res <- prcomp(as.matrix(t(Y)), center = center, scale. = scale, rank. = L)
-    factors <- as.data.frame(res$x)
-    colnames(factors) <- paste0("dim", 1:L)
+    res<-prcomp(as.matrix(t(Y)), center=center, scale.=scale, rank.=L)
+    factors<-as.data.frame(res$x)
+    colnames(factors)<-paste0("dim", 1:L)
     factors
 }
-pca_d<-pca(assay(sce2,"binomial_deviance_residuals"))
+pca_d<-pca(assay(sce2, "binomial_deviance_residuals"))
 pca_d$resid_type<-"deviance_residuals"
-pca_p<-pca(assay(sce2,"binomial_pearson_residuals"))
+pca_p<-pca(assay(sce2, "binomial_pearson_residuals"))
 pca_p$resid_type<-"pearson_residuals"
 cm<-as.data.frame(colData(sce2))
-pd<-rbind(cbind(cm,pca_d),cbind(cm,pca_p))
-ggplot(pd,aes(x=dim1,y=dim2,colour=phenoid))+geom_point()+
-  facet_wrap(~resid_type,scales="free",nrow=2)+
+pd<-rbind(cbind(cm, pca_d), cbind(cm, pca_p))
+ggplot(pd, aes(x=dim1, y=dim2, colour=phenoid)) + geom_point() +
+  facet_wrap(~resid_type, scales="free", nrow=2) +
   ggtitle("PCA applied to null residuals of high deviance genes")
 ```
 
 The null residuals approach still captures most of the biological structure,
 but the resolution between clusters is diminished and there is more noise.
 
-## Learn More
+# Learn More
 
 For more details, check out these in-depth vignettes, which also address how
 to adjust for batch effects:
