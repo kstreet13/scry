@@ -22,7 +22,8 @@ Suggests:
     testthat,
     covr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    DuoClustering2018
 VignetteBuilder: knitr
 LazyData: false
 BugReports: https://github.com/kstreet13/scry/issues
