@@ -99,11 +99,3 @@ ggplot(pd, aes(x=dim1, y=dim2, colour=phenoid)) + geom_point() +
 
 The null residuals approach still captures most of the biological structure,
 but the resolution between clusters is diminished and there is more noise.
-
-# Learn More
-
-For more details, check out these in-depth vignettes, which also address how
-to adjust for batch effects:
-
-* **Feature Selection with Deviance**
-* **Dimension Reduction with GLM-PCA and Null Residuals Approximation**
