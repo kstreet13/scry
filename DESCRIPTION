@@ -1,11 +1,16 @@
 Package: scry
 Title: Small-Count Analysis Methods from the Rafalab
 Version: 0.99.5
-Description: This package incorporates several analysis methods developed
-            by members of the Irizarry lab.
+Description: Many modern biological datasets consist of small counts that are 
+            not well fit by standard linear-Gaussian methods such as principal
+            component analysis. This package provides implementations of 
+            count-based feature selection and dimension reduction algorithms.
+            These methods can be used to facilitate unsupervised analysis
+            of any high-dimensional data such as single-cell RNA-seq.
 Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role = c("aut", "cre", "cph")),
-            person("Kelly", "Street", email = "street.kelly@gmail.com", role="aut"))
+            person("Kelly", "Street", email = "street.kelly@gmail.com", 
+            role="aut"))
 License: Artistic-2.0
 Depends:
     R (>= 3.5),
@@ -22,11 +27,12 @@ Suggests:
     testthat,
     covr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    DuoClustering2018
 VignetteBuilder: knitr
 LazyData: false
 BugReports: https://github.com/kstreet13/scry/issues
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Encoding: UTF-8
 biocViews:
     DimensionReduction,
