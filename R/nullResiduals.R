@@ -140,7 +140,7 @@ setMethod(f = "nullResiduals",
               name <- paste(fam, type, "residuals", sep="_")
               assay(object, name) <- .null_residuals_batch(m, fam, type, batch)
               object
-          })	
+          })
 
 #' @rdname nullResiduals
 #' @export
