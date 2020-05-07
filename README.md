@@ -23,5 +23,12 @@ if (!requireNamespace("BiocManager", quietly=TRUE))
 BiocManager::install("scry")
 ```
 
+The Bioconductor release requires R version 4.0. If you prefer to use the older
+R 3.6, you can install from the unofficial r3 branch as follows:
+
+```
+remotes::install_github("kstreet13/scry@r3")
+```
+
 ## Issues and bug reports
 Please use https://github.com/kstreet13/scry/issues to submit issues, bug reports, and comments.
