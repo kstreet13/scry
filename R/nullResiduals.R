@@ -81,9 +81,11 @@
 #'   residuals matrix can be analyzed with standard PCA as a fast approximation
 #'   to GLM-PCA.
 #'
-#' @param object an object inheriting from \link{SummarizedExperiment} (such as
-#'   \code{\link{SingleCellExperiment}}). Alternatively, a matrix of integer
-#'   counts.
+#' @param object The object on which to compute residuals. It can be a 
+#'   matrix-like object (e.g. matrix, Matrix, DelayedMatrix, HDF5Matrix) with 
+#'   genes int he rows and samples in the columns. Specialized methods are 
+#'   defined for objects inheriting from \link{SummarizedExperiment} (such as
+#'   \code{\link{SingleCellExperiment}}).
 #' @param assay a string or integer specifying which assay contains the count
 #'   data (default = 1). Ignored if \code{object} is a matrix.
 #' @param fam a string specifying the model type to be used for calculating the
@@ -162,4 +164,20 @@ setMethod(f = "nullResiduals",
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
               .null_residuals_batch(as.matrix(object), fam, type, batch)
+          })
+
+#' @rdname nullResiduals
+#' @export
+#' @importClassesFrom DelayedArray DelayedMatrix
+setMethod(f = "nullResiduals", 
+          signature = signature(object = "ANY"), 
+          definition = function(object, fam = c("binomial", "poisson"), 
+                                type = c("deviance", "pearson"), 
+                                batch = NULL){
+              if(!is(x, "HDF5Matrix") && !is(x, "DelayedMatrix")) {
+                  stop("x is of type ", class(x), ", currently not supported")
+                } else {
+                    fam <- match.arg(fam); type <- match.arg(type)
+                    .null_residuals_batch(object, fam, type, batch)
+                }
           })
