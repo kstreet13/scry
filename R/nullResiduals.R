@@ -19,21 +19,45 @@
 .binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
-    if(length(p) == nrow(X)){ 
-        #p is a vector, length must match nrow(X)
-        mu <- outer(p, n)
-    }else if(!is.null(dim(p)) && dim(p) == dim(X)){
-        # p is matrix, must have same dims as X
-        mu <- t(t(p)*n)
-    }else{ stop("dimensions of p and X must match!") }
-    term1 <- X*log(X/mu)
-    term1[is.na(term1)] <- 0 #0*log(0)=0
-    nx <- t(n - t(X))
-    term2 <- nx*log(nx/outer(1-p, n))
-    #this next line would only matter if all counts
-    #were from a single gene, so not checking saves time.
-    # term2[is.na(term2)] <- 0 
-    sign(X-mu)*sqrt(2*(term1+term2))
+    if(is.matrix(X)){ #X is a dense matrix
+        if(length(p) == nrow(X)){ 
+            #p is a vector, length must match nrow(X)
+            mu <- outer(p, n)
+        } else if(!is.null(dim(p)) && dim(p) == dim(X)){
+            # p is matrix, must have same dims as X
+            mu <- t(t(p)*n)
+        } else { 
+            stop("dimensions of p and X must match!") 
+        }
+        term1 <- X*log(X/mu)
+        term1[is.na(term1)] <- 0 #0*log(0)=0
+        nx <- t(n - t(X))
+        term2 <- nx*log(nx/outer(1-p, n))
+        #this next line would only matter if all counts
+        #were from a single gene, so not checking saves time.
+        # term2[is.na(term2)] <- 0 
+        return(sign(X-mu)*sqrt(2*(term1+term2)))
+    } else { #X is a sparse Matrix or delayed Array
+        stopifnot(length(p) == nrow(X))
+        dr_func<-function(j){
+            #j is a row index of X
+            x <- X[j,]
+            mu <- n*p[j]
+            term1 <- x*log(x/mu)
+            term1[is.na(term1)] <- 0 #0*log(0)=0
+            nx <- n-x
+            term2 <- nx*log(nx/(n*(1-p[j])))
+            #this next line would only matter if all counts
+            #were from a single gene, so not checking saves time.
+            # term2[is.na(term2)] <- 0 
+            sign(x-mu)*sqrt(2*(term1+term2))
+        }
+        #up to this point no large dense objects have been created
+        #the last line here is to be modified to write each row
+        #to a disk-based delayed Array object to avoid creating the big
+        #dense object.
+        return(t(vapply(seq_len(nrow(X)),dr_func,FUN.VALUE=0.0*n)))
+    }
 }
 
 .poisson_deviance_residuals <- function(x, xhat){
@@ -48,7 +72,7 @@
 
 .null_residuals <- function(m, fam = c("binomial", "poisson"), 
                            type = c("deviance", "pearson")){
-    #m is a matrix
+    #m is a matrix, sparse Matrix, or delayed Array
     fam <- match.arg(fam); type <- match.arg(type)
     sz <- compute_size_factors(m, fam)
     if(fam == "binomial") {
@@ -56,22 +80,54 @@
         if(type == "deviance"){
             return(.binomial_deviance_residuals(m, phat, sz))
         } else { #pearson residuals
-            mhat <- outer(phat, sz)
-            res <- (m-mhat)/sqrt(mhat*(1-phat))
-            res[is.na(res)] <- 0 #case of 0/0
-            return(res)
-        }
+            if(is.matrix(m)){
+                mhat <- outer(phat, sz)
+                res <- (m-mhat)/sqrt(mhat*(1-phat))
+                res[is.na(res)] <- 0 #case of 0/0
+                return(res)
+            } else { #if m is sparse Matrix or delayed Array
+                pr_func<-function(j){
+                    mhat <- phat[j]*sz
+                    res <- (m[j,]-mhat)/sqrt(mhat*(1-phat[j]))
+                    res[is.na(res)] <- 0 #case of 0/0
+                }
+                #this last line is the only part where the full dense object
+                #is instantiated in memory, replace with row-by-row write to 
+                #delayedArray
+                return(t(vapply(seq_len(nrow(m),pr_func,FUN.VALUE=0.0*sz))))
+            } #end sparse binomial Pearson block
+        } #end general binomial Pearson residuals block
     } else { #fam == "poisson"
-        mhat <- outer(rowSums(m)/sum(sz), sz) #first argument is
-        #"lambda hat" (MLE)
-        if(type == "deviance"){ 
-            return(.poisson_deviance_residuals(m, mhat))
-        } else { #pearson residuals
-            res <- (m-mhat)/sqrt(mhat)
-            res[is.na(res)] <- 0 #case of 0/0
-            return(res)
-        }
-    } 
+        lambda<-rowSums(m)/sum(sz)
+        if(is.matrix(m)){ #dense data matrix
+            mhat <- outer(lambda, sz) 
+            if(type == "deviance"){ 
+                return(.poisson_deviance_residuals(m, mhat))
+            } else { #pearson residuals
+                res <- (m-mhat)/sqrt(mhat)
+                res[is.na(res)] <- 0 #case of 0/0
+                return(res)
+            } #end dense Poisson Pearson residuals block
+        } else { #case where m is a sparse Matrix or delayed Array
+            lambda<- rowSums(m)/sum(sz)
+            if(type == "deviance"){
+                rfunc<-function(j){
+                    .poisson_deviance_residuals(m[j,], lambda[j]*sz)
+                }
+            } else { #pearson residuals
+                rfunc<-function(j){
+                    mhat<- lambda[j]*sz
+                    res<- (m[j,]-mhat)/sqrt(mhat)
+                    res[is.na(res)] <- 0
+                    res
+                }
+            }
+            #up to this point no dense objects created in memory, 
+            #modify below line
+            #to write each row to a disk based delayedArray
+            return(t(vapply(seq_len(nrow(m)),rfunc,FUN.VALUE=0.0*sz)))
+        } #end sparse Poisson block
+    } #end general Poisson block
 }
 
 .null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
@@ -155,7 +211,7 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"), 
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              m <- as.matrix(assay(object, assay))
+              # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
               assay(object, name) <- .null_residuals_batch(m, fam, type, batch)
               object
@@ -180,7 +236,8 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"), 
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              .null_residuals_batch(as.matrix(object), fam, type, batch)
+              #.null_residuals_batch(as.matrix(object), fam, type, batch)
+              .null_residuals_batch(object, fam, type, batch)
           })
 
 #' @rdname nullResiduals
