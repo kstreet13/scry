@@ -1,4 +1,21 @@
 # Helper functions for nullResiduals
+.null_poisson_deviance_residuals_delayed <- function(m){
+    # adapted from compute_size_factors
+    lsz <- log(DelayedArray::colSums(m))
+    sz <- exp(lsz-mean(lsz))
+    
+    # adapted from .null_residuals
+    lambdahat <- DelayedArray::rowSums(m) / sum(sz)
+    mhat <- DelayedArray(matrix(lambdahat)) %*%
+        DelayedArray(matrix(sz, nrow = 1))
+    
+    # adapted from .poisson_deviance_residuals
+    term1 <- m * log(m / mhat)
+    term1[is.na(term1)] <- 0 #0*log(0)=0
+    s2 <- 2 * (term1 - (m - mhat))
+    sign(m - mhat) * sqrt(abs(s2))
+}
+
 .binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
