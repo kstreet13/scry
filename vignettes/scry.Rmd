@@ -99,3 +99,16 @@ ggplot(pd, aes(x=dim1, y=dim2, colour=phenoid)) + geom_point() +
 
 The null residuals approach still captures most of the biological structure,
 but the resolution between clusters is diminished and there is more noise.
+
+### Working with HDF5 matrices
+
+For large datasets, it may be advantageous to keep the original data in a on-disk HDF5 file and avoid loading the full data in memory.
+
+One can run `nullResiduals` on `HDF5Matrix`, `DelayedArray` matrices, and sparse matrices from the `Matrix` package with the same syntax used for the base matrix case.
+
+We illustrate this with one dataset from the `TENxPBMCData` package.
+
+```{r}
+library(TENxPBMCData)
+pbmc <- TENxPBMCData("pbmc4k")
+```
