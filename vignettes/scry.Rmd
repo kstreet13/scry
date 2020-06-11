@@ -108,7 +108,10 @@ One can run `nullResiduals` on `HDF5Matrix`, `DelayedArray` matrices, and sparse
 
 We illustrate this with one dataset from the `TENxPBMCData` package.
 
-```{r}
+```{r, eval=FALSE}
 library(TENxPBMCData)
 pbmc <- TENxPBMCData("pbmc4k")
+
+pbmc <- nullResiduals(pbmc, assay="counts", type="deviance")
+
 ```

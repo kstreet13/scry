@@ -242,7 +242,10 @@ setMethod(f = "nullResiduals",
               fam <- match.arg(fam); type <- match.arg(type)
               # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
-              assay(object, name) <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(sce))
+              tmp <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(sce))
+              rownames(tmp) <- rownames(object)
+              colnames(tmp) <- colnames(object)
+              assay(object, name) <- tmp
               object
           })
 
