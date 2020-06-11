@@ -71,10 +71,20 @@
 }
 
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
-                           type = c("deviance", "pearson")){
+                           type = c("deviance", "pearson"),
+                           size_factors=NULL){
     #m is a matrix, sparse Matrix, or delayed Array
     fam <- match.arg(fam); type <- match.arg(type)
-    sz <- compute_size_factors(m, fam)
+    if(!is.null(size_factors)) {
+        sz <- compute_size_factors(m)
+    }
+
+    if(fam=="poisson"){
+        lsz<-log(sz)
+        #make geometric mean of sz be 1 for poisson
+        sz <- exp(lsz-mean(lsz))
+    }
+
     if(fam == "binomial") {
         phat <- rowSums(m)/sum(sz)
         if(type == "deviance"){
@@ -131,7 +141,7 @@
 }
 
 .null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
-                                 type=c("deviance", "pearson"), batch=NULL){
+                                 type=c("deviance", "pearson"), batch=NULL, size_factors=NULL){
     #null residuals but with batch indicator (batch=a factor)
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(batch)){
@@ -206,7 +216,7 @@
 #' @export
 setMethod(f = "nullResiduals",
           signature = signature(object = "SummarizedExperiment"),
-          definition = function(object, assay = 1,
+          definition = function(object, assay = "counts",
                                 fam = c("binomial", "poisson"),
                                 type = c("deviance", "pearson"),
                                 batch = NULL){
@@ -214,6 +224,21 @@ setMethod(f = "nullResiduals",
               # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
               assay(object, name) <- .null_residuals_batch(assay(object, assay), fam, type, batch)
+              object
+          })
+
+#' @rdname nullResiduals
+#' @export
+setMethod(f = "nullResiduals",
+          signature = signature(object = "SingleCellExperiment"),
+          definition = function(object, assay = "counts",
+                                fam = c("binomial", "poisson"),
+                                type = c("deviance", "pearson"),
+                                batch = NULL){
+              fam <- match.arg(fam); type <- match.arg(type)
+              # m <- as.matrix(assay(object, assay))
+              name <- paste(fam, type, "residuals", sep="_")
+              assay(object, name) <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(sce))
               object
           })
 
