@@ -70,13 +70,16 @@
     sign(x-xhat)*sqrt(abs(s2))
 }
 
+#' @importFrom Matrix rowSums
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
                            type = c("deviance", "pearson"),
                            size_factors=NULL){
     #m is a matrix, sparse Matrix, or delayed Array
     fam <- match.arg(fam); type <- match.arg(type)
-    if(!is.null(size_factors)) {
+    if(is.null(size_factors)) {
         sz <- compute_size_factors(m)
+    } else {
+        sz <- size_factors
     }
 
     if(fam=="poisson"){
@@ -145,13 +148,13 @@
     #null residuals but with batch indicator (batch=a factor)
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(batch)){
-        return(.null_residuals(m, fam = fam, type = type))
+        return(.null_residuals(m, fam = fam, type = type, size_factors = size_factors))
     } else { #case where there is more than one batch
         stopifnot(length(batch) == ncol(m) && is(batch, "factor"))
         res <- matrix(0.0, nrow = nrow(m), ncol = ncol(m))
         for(b in levels(batch)){
             idx <- (batch == b)
-            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type)
+            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type, size_factors = size_factors)
         }
         return(res)
     }

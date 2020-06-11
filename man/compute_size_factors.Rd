@@ -4,7 +4,7 @@
 \alias{compute_size_factors}
 \title{Compute size factors}
 \usage{
-compute_size_factors(m, fam = c("binomial", "poisson"))
+compute_size_factors(m)
 }
 \arguments{
 \item{m}{a matrix or sparse \code{\link{Matrix}} of integer count values.}
@@ -17,7 +17,7 @@ A vector of size factors with length equal to the number of columns
   of \code{m}.
 }
 \description{
-Computes a size factor for each observation (column) of a 
+Computes a size factor for each observation (column) of a
   count data matrix based on an approximate multinomial model.
 }
 \details{
