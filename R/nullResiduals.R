@@ -103,11 +103,12 @@
                     mhat <- phat[j]*sz
                     res <- (m[j,]-mhat)/sqrt(mhat*(1-phat[j]))
                     res[is.na(res)] <- 0 #case of 0/0
+                    return(res)
                 }
                 #this last line is the only part where the full dense object
                 #is instantiated in memory, replace with row-by-row write to
                 #delayedArray
-                return(t(vapply(seq_len(nrow(m),pr_func,FUN.VALUE=0.0*sz))))
+                return(t(vapply(seq_len(nrow(m)),pr_func,FUN.VALUE=0.0*sz)))
             } #end sparse binomial Pearson block
         } #end general binomial Pearson residuals block
     } else { #fam == "poisson"
