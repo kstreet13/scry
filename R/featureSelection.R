@@ -16,7 +16,14 @@
 .compute_deviance<-function(m,fam=c("binomial","poisson")){
     #m a data matrix with genes=rows
     fam<-match.arg(fam)
-    sz<-compute_size_factors(m,fam)
+    sz<-compute_size_factors(m)
+
+    if(fam=="poisson"){
+        lsz<-log(sz)
+        #make geometric mean of sz be 1 for poisson
+        sz <- exp(lsz-mean(lsz))
+    }
+
     sz_sum<-sum(sz)
     m<-Matrix::t(m) #column slicing faster than row slicing for matrix in R.
     #note: genes are now in the COLUMNS of m
@@ -50,7 +57,7 @@
             res[,i]<-.compute_deviance(m[,batch==b],fam=fam)
         }
         #deviance is additive across subsets of observations
-        return(rowSums(res)) 
+        return(rowSums(res))
     }
 }
 
@@ -61,7 +68,7 @@
 #'   feature has a constant rate. Features with large deviance are likely to be
 #'   informative. Uninformative, low deviance features can be discarded to speed
 #'   up downstream analyses and reduce memory footprint.
-#' 
+#'
 #' @param object an object inheriting from \link{SummarizedExperiment} (such as
 #'   \code{\link{SingleCellExperiment}}). Alternatively, a matrix or sparse
 #'   Matrix of integer counts.
@@ -81,7 +88,7 @@
 #'   in decreasing order of deviance? Default: FALSE, unless nkeep is specified,
 #'   in which case it is forced to be TRUE. Ignored for matrix and sparse Matrix
 #'   inputs.
-#'   
+#'
 #' @return The original \code{SingleCellExperiment} or
 #'   \code{SummarizedExperiment} object with the deviance statistics for each
 #'   feature appended to the rowData. The new column name will be either
@@ -95,27 +102,27 @@
 #'   an informative gene as one that is poorly fit by a multinomial model of
 #'   constant expression across cells within each batch. We compute a deviance
 #'   statistic for each gene. Genes with high deviance are more informative.
-#'   
-#' @references 
+#'
+#' @references
 #' Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019). Feature
 #' Selection and Dimension Reduction for Single Cell RNA-Seq based on a
 #' Multinomial Model. \emph{Genome Biology}
 #' \url{https://doi.org/10.1186/s13059-019-1861-6}
-#' 
-#' @examples 
+#'
+#' @examples
 #' ncells <- 100
 #' u <- matrix(rpois(20000, 5), ncol=ncells)
 #' sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 #' devianceFeatureSelection(sce)
-#' 
+#'
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom SummarizedExperiment rowData<-
 #' @export
 setMethod(f = "devianceFeatureSelection",
           signature = signature(object = "SummarizedExperiment"),
-          definition = function(object, assay = 1, 
-                                fam = c("binomial", "poisson"), batch = NULL, 
+          definition = function(object, assay = 1,
+                                fam = c("binomial", "poisson"), batch = NULL,
                                 nkeep = NULL, sorted = FALSE){
               fam<-match.arg(fam)
               m <- assay(object, assay)
@@ -127,15 +134,15 @@ setMethod(f = "devianceFeatureSelection",
               if(!is.null(nkeep) && nkeep>=length(dev)){
                   nkeep<-NULL
               } #user wants to keep all features
-              if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are 
+              if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are
               # taking a subset of rows
-              if(sorted){ 
+              if(sorted){
                   o<-order(dev,decreasing=TRUE)
                   object<-object[o,]
                   if(is.null(nkeep)){ #sorting but no subsetting
-                      return(object) 
+                      return(object)
                   } else { #sorting and subsetting
-                      return(object[seq_len(nkeep),]) 
+                      return(object[seq_len(nkeep),])
                   }
               } else { #no sorting, no subsetting
                   return(object)
