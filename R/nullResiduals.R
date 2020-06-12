@@ -65,17 +65,7 @@
     sign(x-xhat)*sqrt(abs(s2))
 }
 
-.poisson_deviance_residuals_delayed <- function(x, xhat){
-    #x, xhat assumed to be same dimension
-    #sz <- exp(offsets)
-    #xhat <- lambda*sz
-    term1 <- x*log(x/xhat)
-    term1[is.na(term1)] <- 0 #0*log(0)=0
-    s2 <- 2*(term1-(x-xhat))
-    sign(x-xhat)*sqrt(abs(s2))
-}
-
-#' @importFrom Matrix rowSums
+#' @importFrom Matrix rowSums 
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
                            type = c("deviance", "pearson"),
                            size_factors=NULL){
