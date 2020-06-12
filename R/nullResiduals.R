@@ -1,19 +1,13 @@
 # Helper functions for nullResiduals
 .null_poisson_deviance_residuals_delayed <- function(m){
-    # adapted from compute_size_factors
-    lsz <- log(DelayedArray::colSums(m))
-    sz <- exp(lsz-mean(lsz))
+    sz <- compute_size_factors(m)
 
     # adapted from .null_residuals
     lambdahat <- DelayedArray::rowSums(m) / sum(sz)
-    mhat <- DelayedArray(matrix(lambdahat)) %*%
-        DelayedArray(matrix(sz, nrow = 1))
+    mhat <- BiocSingular::LowRankMatrix(DelayedArray(matrix(lambdahat)),
+                                        t(DelayedArray(matrix(sz, nrow = 1))))
 
-    # adapted from .poisson_deviance_residuals
-    term1 <- m * log(m / mhat)
-    term1[is.na(term1)] <- 0 #0*log(0)=0
-    s2 <- 2 * (term1 - (m - mhat))
-    sign(m - mhat) * sqrt(abs(s2))
+    .poisson_deviance_residuals(x=m, xhat=mhat)
 }
 
 .binomial_deviance_residuals <- function(X, p, n){
@@ -70,11 +64,21 @@
     sign(x-xhat)*sqrt(abs(s2))
 }
 
+.poisson_deviance_residuals_delayed <- function(x, xhat){
+    #x, xhat assumed to be same dimension
+    #sz <- exp(offsets)
+    #xhat <- lambda*sz
+    term1 <- x*log(x/xhat)
+    term1[is.na(term1)] <- 0 #0*log(0)=0
+    s2 <- 2*(term1-(x-xhat))
+    sign(x-xhat)*sqrt(abs(s2))
+}
+
 #' @importFrom Matrix rowSums
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
                            type = c("deviance", "pearson"),
                            size_factors=NULL){
-    #m is a matrix, sparse Matrix, or delayed Array
+    #m is a matrix or sparse Matrix
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(size_factors)) {
         sz <- compute_size_factors(m)
@@ -143,6 +147,39 @@
         } #end sparse Poisson block
     } #end general Poisson block
 }
+
+
+.null_residuals_delayed <- function(m, fam = c("binomial", "poisson"),
+                                    type = c("deviance", "pearson"),
+                                    size_factors=NULL){
+    #m is a DelayedMatrix or HDF5Matrix
+    fam <- match.arg(fam); type <- match.arg(type)
+    if(is.null(size_factors)) {
+        sz <- compute_size_factors(m)
+    } else {
+        sz <- size_factors
+    }
+    
+    if(fam=="poisson"){
+        lsz <- log(DelayedArray::colSums(m))
+        # make geometric mean of sz be 1 for poisson
+        sz <- exp(lsz-mean(lsz))
+    }
+    
+    if(fam == "poisson") {
+        lambdahat <- DelayedArray::rowSums(m) / sum(sz)
+        if(type == "deviance"){
+            mhat <- BiocSingular::LowRankMatrix(DelayedArray(matrix(lambdahat)),
+                                            t(DelayedArray(matrix(sz, nrow = 1))))
+            rfunc <- .poisson_deviance_residuals(x=m, xhat=mhat)
+    } 
+    #up to this point no dense objects created in memory,
+    #modify below line
+    #to write each row to a disk based delayedArray
+    return(t(vapply(seq_len(nrow(m)),rfunc,FUN.VALUE=0.0*sz)))
+    } #end general Poisson block
+}
+
 
 .null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
                                  type=c("deviance", "pearson"), batch=NULL, size_factors=NULL){
@@ -275,6 +312,7 @@ setMethod(f = "nullResiduals",
 #' @rdname nullResiduals
 #' @export
 #' @importClassesFrom DelayedArray DelayedMatrix
+#' @importClassesFrom BiocSingular LowRankMatrix
 setMethod(f = "nullResiduals",
           signature = signature(object = "ANY"),
           definition = function(object, fam = c("binomial", "poisson"),
