@@ -1,6 +1,7 @@
 # Helper functions for nullResiduals
 .null_poisson_deviance_residuals_delayed <- function(m){
-    sz <- compute_size_factors(m)
+    lsz <- log(DelayedArray::colSums(m))
+    sz <- exp(lsz-mean(lsz))
 
     # adapted from .null_residuals
     lambdahat <- DelayedArray::rowSums(m) / sum(sz)
