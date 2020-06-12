@@ -170,7 +170,7 @@
 #'
 #' @param object The object on which to compute residuals. It can be a
 #'   matrix-like object (e.g. matrix, Matrix, DelayedMatrix, HDF5Matrix) with
-#'   genes int he rows and samples in the columns. Specialized methods are
+#'   genes in the rows and samples in the columns. Specialized methods are
 #'   defined for objects inheriting from \link{SummarizedExperiment} (such as
 #'   \code{\link{SingleCellExperiment}}).
 #' @param assay a string or integer specifying which assay contains the count
@@ -242,7 +242,7 @@ setMethod(f = "nullResiduals",
               fam <- match.arg(fam); type <- match.arg(type)
               # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
-              tmp <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(sce))
+              tmp <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(object))
               rownames(tmp) <- rownames(object)
               colnames(tmp) <- colnames(object)
               assay(object, name) <- tmp
