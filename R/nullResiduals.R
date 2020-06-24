@@ -1,16 +1,4 @@
 # Helper functions for nullResiduals
-.null_poisson_deviance_residuals_delayed <- function(m){
-    lsz <- log(DelayedArray::colSums(m))
-    sz <- exp(lsz-mean(lsz))
-
-    # adapted from .null_residuals
-    lambdahat <- DelayedArray::rowSums(m) / sum(sz)
-    mhat <- BiocSingular::LowRankMatrix(DelayedArray(matrix(lambdahat)),
-                                        t(DelayedArray(matrix(sz, nrow = 1))))
-
-    .poisson_deviance_residuals(x=m, xhat=mhat)
-}
-
 .binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
@@ -67,8 +55,8 @@
 
 #' @importFrom Matrix rowSums 
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
-                           type = c("deviance", "pearson"),
-                           size_factors=NULL){
+                            type = c("deviance", "pearson"),
+                            size_factors=NULL){
     #m is a matrix or sparse Matrix
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(size_factors)) {
@@ -76,13 +64,7 @@
     } else {
         sz <- size_factors
     }
-
-    if(fam=="poisson"){
-        lsz<-log(sz)
-        #make geometric mean of sz be 1 for poisson
-        sz <- exp(lsz-mean(lsz))
-    }
-
+    
     if(fam == "binomial") {
         phat <- rowSums(m)/sum(sz)
         if(type == "deviance"){
@@ -107,7 +89,10 @@
             } #end sparse binomial Pearson block
         } #end general binomial Pearson residuals block
     } else { #fam == "poisson"
-        lambda<-rowSums(m)/sum(sz)
+        lsz <- log(sz)
+        #make geometric mean of sz be 1 for poisson
+        sz <- exp(lsz-mean(lsz))
+        lambda <- rowSums(m) / sum(sz)
         if(is.matrix(m)){ #dense data matrix
             mhat <- outer(lambda, sz)
             if(type == "deviance"){
@@ -118,11 +103,11 @@
                 return(res)
             } #end dense Poisson Pearson residuals block
         } else { #case where m is a sparse Matrix or delayed Array
-            lambda<- rowSums(m)/sum(sz)
             if(type == "deviance"){
-                rfunc<-function(j){
-                    .poisson_deviance_residuals(m[j,], lambda[j]*sz)
-                }
+                mhat <- BiocSingular::LowRankMatrix(
+                    DelayedArray(matrix(lambda)),
+                    t(DelayedArray(matrix(sz, nrow = 1))))
+                return(.poisson_deviance_residuals(x=m, xhat=mhat))
             } else { #pearson residuals
                 rfunc<-function(j){
                     mhat<- lambda[j]*sz
@@ -161,19 +146,19 @@
         lambdahat <- DelayedArray::rowSums(m) / sum(sz)
         if(type == "deviance"){
             mhat <- BiocSingular::LowRankMatrix(DelayedArray(matrix(lambdahat)),
-                                            t(DelayedArray(matrix(sz, nrow = 1))))
+                                                t(DelayedArray(matrix(sz, nrow = 1))))
             rfunc <- .poisson_deviance_residuals(x=m, xhat=mhat)
-    } 
-    #up to this point no dense objects created in memory,
-    #modify below line
-    #to write each row to a disk based delayedArray
-    return(t(vapply(seq_len(nrow(m)),rfunc,FUN.VALUE=0.0*sz)))
+        } 
+        #up to this point no dense objects created in memory,
+        #modify below line
+        #to write each row to a disk based delayedArray
+        return(t(vapply(seq_len(nrow(m)),rfunc,FUN.VALUE=0.0*sz)))
     } #end general Poisson block
 }
 
 
 .null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
-                                 type=c("deviance", "pearson"), batch=NULL, size_factors=NULL){
+                                  type=c("deviance", "pearson"), batch=NULL, size_factors=NULL){
     #null residuals but with batch indicator (batch=a factor)
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(batch)){
@@ -309,10 +294,11 @@ setMethod(f = "nullResiduals",
           definition = function(object, fam = c("binomial", "poisson"),
                                 type = c("deviance", "pearson"),
                                 batch = NULL){
-              if(!is(x, "HDF5Matrix") && !is(x, "DelayedMatrix")) {
-                  stop("x is of type ", class(x), ", currently not supported")
-                } else {
-                    fam <- match.arg(fam); type <- match.arg(type)
-                    .null_residuals_batch(object, fam, type, batch)
-                }
+              if(!is(object, "HDF5Matrix") && !is(object, "DelayedMatrix")) {
+                  stop("object is of type ", class(object),
+                       ", currently not supported")
+              } else {
+                  fam <- match.arg(fam); type <- match.arg(type)
+                  .null_residuals_batch(object, fam, type, batch)
+              }
           })

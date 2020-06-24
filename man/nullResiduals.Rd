@@ -51,7 +51,7 @@ nullResiduals(object, ...)
 \arguments{
 \item{object}{The object on which to compute residuals. It can be a
 matrix-like object (e.g. matrix, Matrix, DelayedMatrix, HDF5Matrix) with
-genes int he rows and samples in the columns. Specialized methods are
+genes in the rows and samples in the columns. Specialized methods are
 defined for objects inheriting from \link{SummarizedExperiment} (such as
 \code{\link{SingleCellExperiment}}).}
 
