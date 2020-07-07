@@ -70,24 +70,18 @@
         if(type == "deviance"){
             return(.binomial_deviance_residuals(m, phat, sz))
         } else { #pearson residuals
+            # make mhat
             if(is.matrix(m)){
                 mhat <- outer(phat, sz)
-                res <- (m-mhat)/sqrt(mhat*(1-phat))
-                res[is.na(res)] <- 0 #case of 0/0
-                return(res)
             } else { #if m is sparse Matrix or delayed Array
-                pr_func<-function(j){
-                    mhat <- phat[j]*sz
-                    res <- (m[j,]-mhat)/sqrt(mhat*(1-phat[j]))
-                    res[is.na(res)] <- 0 #case of 0/0
-                    return(res)
-                }
-                #this last line is the only part where the full dense object
-                #is instantiated in memory, replace with row-by-row write to
-                #delayedArray
-                return(t(vapply(seq_len(nrow(m)),pr_func,FUN.VALUE=0.0*sz)))
-            } #end sparse binomial Pearson block
-        } #end general binomial Pearson residuals block
+                mhat <- BiocSingular::LowRankMatrix(
+                    DelayedArray(matrix(phat)),
+                    DelayedArray(matrix(sz)))
+            }
+            res <- (m-mhat)/sqrt(mhat*(1-phat))
+            res[is.na(res)] <- 0 #case of 0/0
+            return(res)
+        }
     } else { #fam == "poisson"
         lsz <- log(sz)
         #make geometric mean of sz be 1 for poisson
@@ -99,7 +93,7 @@
         } else { #case where m is a sparse Matrix or delayed Array
             mhat <- BiocSingular::LowRankMatrix(
                 DelayedArray(matrix(lambda)),
-                t(DelayedArray(matrix(sz, nrow = 1))))
+                DelayedArray(matrix(sz)))
         }
         if(type == "deviance"){
             return(.poisson_deviance_residuals(m, mhat))
