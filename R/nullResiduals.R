@@ -6,7 +6,7 @@
         if(length(p) == nrow(X)){
             #p is a vector, length must match nrow(X)
             mu <- outer(p, n)
-        } else if(!is.null(dim(p)) && dim(p) == dim(X)){
+        } else if(!is.null(dim(p)) && all(dim(p) == dim(X))){
             # p is matrix, must have same dims as X
             mu <- t(t(p)*n)
         } else {
@@ -22,24 +22,27 @@
         return(sign(X-mu)*sqrt(2*(term1+term2)))
     } else { #X is a sparse Matrix or delayed Array
         stopifnot(length(p) == nrow(X))
-        dr_func<-function(j){
-            #j is a row index of X
-            x <- X[j,]
-            mu <- n*p[j]
-            term1 <- x*log(x/mu)
-            term1[is.na(term1)] <- 0 #0*log(0)=0
-            nx <- n-x
-            term2 <- nx*log(nx/(n*(1-p[j])))
-            #this next line would only matter if all counts
-            #were from a single gene, so not checking saves time.
-            # term2[is.na(term2)] <- 0
-            sign(x-mu)*sqrt(2*(term1+term2))
+        if(length(p) == nrow(X)){ 
+            #p is a vector, length must match nrow(X)
+            mu <- BiocSingular::LowRankMatrix(
+                DelayedArray(matrix(p)),
+                DelayedArray(matrix(n)))
+        }else if(!is.null(dim(p)) && all(dim(p) == dim(X))){
+            # p is matrix, must have same dims as X
+            mu <- t(t(p)*n)
+        }else{
+            stop("dimensions of p and X must match!")
         }
-        #up to this point no large dense objects have been created
-        #the last line here is to be modified to write each row
-        #to a disk-based delayed Array object to avoid creating the big
-        #dense object.
-        return(t(vapply(seq_len(nrow(X)),dr_func,FUN.VALUE=0.0*n)))
+        term1 <- X*log(X/mu)
+        term1[is.na(term1)] <- 0 #0*log(0)=0
+        nx <- t(n - t(X))
+        term2 <- nx*log(nx/BiocSingular::LowRankMatrix(
+            DelayedArray(matrix(1-p)),
+            DelayedArray(matrix(n))))
+        #this next line would only matter if all counts
+        #were from a single gene, so not checking saves time.
+        term2[is.na(term2)] <- 0 
+        return(sign(X-mu)*sqrt(2*(term1+term2)))
     }
 }
 
