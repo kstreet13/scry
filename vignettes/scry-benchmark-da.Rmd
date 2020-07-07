@@ -5,10 +5,10 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
   BiocStyle::html_document:
     toc: false
-vignette: >
-  %\VignetteEngine{knitr::knitr}
-  %\VignetteIndexEntry{Benchmarking scry methods with DelayedArray backends}
-  %\usepackage[UTF-8]{inputenc}
+<!-- vignette: > -->
+<!--   %\VignetteEngine{knitr::knitr} -->
+<!--   %\VignetteIndexEntry{Benchmarking scry methods with DelayedArray backends} -->
+<!--   %\usepackage[UTF-8]{inputenc} -->
 ---
 
 ```{r setup, include=FALSE}
