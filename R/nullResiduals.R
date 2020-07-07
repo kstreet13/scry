@@ -93,34 +93,21 @@
         #make geometric mean of sz be 1 for poisson
         sz <- exp(lsz-mean(lsz))
         lambda <- rowSums(m) / sum(sz)
+        # make mhat
         if(is.matrix(m)){ #dense data matrix
             mhat <- outer(lambda, sz)
-            if(type == "deviance"){
-                return(.poisson_deviance_residuals(m, mhat))
-            } else { #pearson residuals
-                res <- (m-mhat)/sqrt(mhat)
-                res[is.na(res)] <- 0 #case of 0/0
-                return(res)
-            } #end dense Poisson Pearson residuals block
         } else { #case where m is a sparse Matrix or delayed Array
-            if(type == "deviance"){
-                mhat <- BiocSingular::LowRankMatrix(
-                    DelayedArray(matrix(lambda)),
-                    t(DelayedArray(matrix(sz, nrow = 1))))
-                return(.poisson_deviance_residuals(x=m, xhat=mhat))
-            } else { #pearson residuals
-                rfunc<-function(j){
-                    mhat<- lambda[j]*sz
-                    res<- (m[j,]-mhat)/sqrt(mhat)
-                    res[is.na(res)] <- 0
-                    res
-                }
-            }
-            #up to this point no dense objects created in memory,
-            #modify below line
-            #to write each row to a disk based delayedArray
-            return(t(vapply(seq_len(nrow(m)),rfunc,FUN.VALUE=0.0*sz)))
-        } #end sparse Poisson block
+            mhat <- BiocSingular::LowRankMatrix(
+                DelayedArray(matrix(lambda)),
+                t(DelayedArray(matrix(sz, nrow = 1))))
+        }
+        if(type == "deviance"){
+            return(.poisson_deviance_residuals(m, mhat))
+        } else { # pearson residuals
+            res <- (m-mhat)/sqrt(mhat)
+            res[is.na(res)] <- 0 #case of 0/0
+            return(res)
+        }
     } #end general Poisson block
 }
 
