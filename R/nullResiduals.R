@@ -53,7 +53,7 @@
     sign(x-xhat)*sqrt(abs(s2))
 }
 
-#' @importFrom Matrix rowSums 
+#' @importFrom Matrix rowSums
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
                             type = c("deviance", "pearson"),
                             size_factors=NULL){
@@ -64,7 +64,7 @@
     } else {
         sz <- size_factors
     }
-    
+
     if(fam == "binomial") {
         phat <- rowSums(m)/sum(sz)
         if(type == "deviance"){
@@ -135,20 +135,20 @@
     } else {
         sz <- size_factors
     }
-    
+
     if(fam=="poisson"){
         lsz <- log(DelayedArray::colSums(m))
         # make geometric mean of sz be 1 for poisson
         sz <- exp(lsz-mean(lsz))
     }
-    
+
     if(fam == "poisson") {
         lambdahat <- DelayedArray::rowSums(m) / sum(sz)
         if(type == "deviance"){
             mhat <- BiocSingular::LowRankMatrix(DelayedArray(matrix(lambdahat)),
                                                 t(DelayedArray(matrix(sz, nrow = 1))))
             rfunc <- .poisson_deviance_residuals(x=m, xhat=mhat)
-        } 
+        }
         #up to this point no dense objects created in memory,
         #modify below line
         #to write each row to a disk based delayedArray
@@ -281,6 +281,11 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"),
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
+
+              warning("The matrix with the residuals will not be sparse.\n",
+                      "Note that this will result in an object substantially larger than the input.\n",
+                      "In some extreme cases this could result in an out-of-memory error.\n",
+                      "We recommend using HDF5Matrix for large datasets. See the vignette for an example.")
               #.null_residuals_batch(as.matrix(object), fam, type, batch)
               .null_residuals_batch(object, fam, type, batch)
           })

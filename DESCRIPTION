@@ -20,7 +20,9 @@ Imports:
     glmpca,
     Matrix,
     SingleCellExperiment,
-    SummarizedExperiment
+    SummarizedExperiment,
+    BiocSingular,
+    DelayedArray
 Suggests:
     BiocGenerics,
     knitr,
@@ -28,7 +30,8 @@ Suggests:
     covr,
     rmarkdown,
     ggplot2,
-    DuoClustering2018
+    DuoClustering2018,
+    HDF5Array
 VignetteBuilder: knitr
 LazyData: false
 URL: https://bioconductor.org/packages/scry.html
