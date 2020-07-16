@@ -17,7 +17,7 @@ Depends:
     stats,
     methods
 Imports:
-    glmpca (>= 0.2.0),
+    glmpca,
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment,
