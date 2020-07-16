@@ -100,24 +100,19 @@ test_that("GLMPCA works with intended input types", {
     
     outSE <- GLMPCA(se, L = 2, fam = "poi")
     
-    expect_is(metadata(outSE)$glmpca, "list")
-    expect_equal(names(metadata(outSE)$glmpca),
-                 c("factors","loadings","coefX","coefZ","dev","family"))
+    expect_s3_class(metadata(outSE)$glmpca, "glmpca")
+    gnames<-c("factors","loadings","coefX","coefZ","dev","glmpca_family") 
+    expect_true(all(gnames %in% names(metadata(outSE)$glmpca)))
     
     outSCE <- GLMPCA(sce, L = 2, fam = "poi")
     
-    expect_is(metadata(outSE)$glmpca, "list")
+    expect_s3_class(metadata(outSE)$glmpca, "glmpca")
     expect_true("GLMPCA" %in% reducedDimNames(outSCE))
     
     outMAT <- GLMPCA(u, L = 2, fam = "poi")
     
-    expect_is(outMAT, "list")
-    expect_equal(names(outMAT),
-                 c("factors","loadings","coefX","coefZ","dev","family"))
-    
-    
-    # pathological cases
-    
+    expect_s3_class(outMAT, "glmpca")
+    expect_true(all(gnames %in% names(outMAT) ))
 })
 
 test_that("nullResiduals works with intended input types", {
