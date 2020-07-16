@@ -17,7 +17,7 @@ Depends:
     stats,
     methods
 Imports:
-    glmpca,
+    glmpca (>= 0.2.0),
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment,
@@ -36,7 +36,7 @@ VignetteBuilder: knitr
 LazyData: false
 URL: https://bioconductor.org/packages/scry.html
 BugReports: https://github.com/kstreet13/scry/issues
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 biocViews:
     DimensionReduction,
@@ -48,4 +48,3 @@ biocViews:
     Sequencing,
     SingleCell,
     Transcriptomics
-    

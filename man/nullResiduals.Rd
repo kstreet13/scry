@@ -3,7 +3,6 @@
 \name{nullResiduals}
 \alias{nullResiduals}
 \alias{nullResiduals,SummarizedExperiment-method}
-\alias{nullResiduals,SingleCellExperiment-method}
 \alias{nullResiduals,matrix-method}
 \alias{nullResiduals,Matrix-method}
 \alias{nullResiduals,ANY-method}
@@ -13,15 +12,7 @@ nullResiduals(object, ...)
 
 \S4method{nullResiduals}{SummarizedExperiment}(
   object,
-  assay = "counts",
-  fam = c("binomial", "poisson"),
-  type = c("deviance", "pearson"),
-  batch = NULL
-)
-
-\S4method{nullResiduals}{SingleCellExperiment}(
-  object,
-  assay = "counts",
+  assay = 1,
   fam = c("binomial", "poisson"),
   type = c("deviance", "pearson"),
   batch = NULL
@@ -49,11 +40,9 @@ nullResiduals(object, ...)
 )
 }
 \arguments{
-\item{object}{The object on which to compute residuals. It can be a
-matrix-like object (e.g. matrix, Matrix, DelayedMatrix, HDF5Matrix) with
-genes in the rows and samples in the columns. Specialized methods are
-defined for objects inheriting from \link{SummarizedExperiment} (such as
-\code{\link{SingleCellExperiment}}).}
+\item{object}{an object inheriting from \link{SummarizedExperiment} (such as
+\code{\link{SingleCellExperiment}}). Alternatively, a matrix of integer
+counts.}
 
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
@@ -87,17 +76,17 @@ Computes deviance or Pearson residuals for count data based on a
 }
 \details{
 This function should be used only on the un-normalized counts.
- It was originally designed for single-cell RNA-seq counts
- obtained by the use of unique molecular identifiers (UMIs) and has not been
+ It was originally designed for single-cell RNA-seq counts 
+ obtained by the use of unique molecular identifiers (UMIs) and has not been 
  tested on read count data without UMIs or other data types.
-
- Note that even though sparse Matrix objects are accepted as input,
- they are internally coerced to dense matrix before processing,
+ 
+ Note that even though sparse Matrix objects are accepted as input, 
+ they are internally coerced to dense matrix before processing, 
  because the output
- is always a dense matrix since the residuals transformation
+ is always a dense matrix since the residuals transformation 
  is not sparsity preserving.
  To avoid memory issues, it is recommended to perform feature selection first
- and subset the number of features to a smaller size prior to computing the
+ and subset the number of features to a smaller size prior to computing the 
  residuals.
 }
 \examples{
