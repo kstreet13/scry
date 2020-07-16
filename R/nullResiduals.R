@@ -140,18 +140,19 @@
     } #end general Poisson block
 }
 
+
 .null_residuals_batch <- function(m, fam=c("binomial", "poisson"),
                                   type=c("deviance", "pearson"), batch=NULL, size_factors=NULL){
     #null residuals but with batch indicator (batch=a factor)
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(batch)){
-        return(.null_residuals(m, fam = fam, type = type))
+        return(.null_residuals(m, fam = fam, type = type, size_factors = size_factors))
     } else { #case where there is more than one batch
         stopifnot(length(batch) == ncol(m) && is(batch, "factor"))
         res <- matrix(0.0, nrow = nrow(m), ncol = ncol(m))
         for(b in levels(batch)){
             idx <- (batch == b)
-            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type)
+            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type, size_factors = size_factors)
         }
         return(res)
     }
@@ -164,9 +165,11 @@
 #'   residuals matrix can be analyzed with standard PCA as a fast approximation
 #'   to GLM-PCA.
 #'
-#' @param object an object inheriting from \link{SummarizedExperiment} (such as
-#'   \code{\link{SingleCellExperiment}}). Alternatively, a matrix of integer
-#'   counts.
+#' @param object The object on which to compute residuals. It can be a
+#'   matrix-like object (e.g. matrix, Matrix, DelayedMatrix, HDF5Matrix) with
+#'   genes in the rows and samples in the columns. Specialized methods are
+#'   defined for objects inheriting from \link{SummarizedExperiment} (such as
+#'   \code{\link{SingleCellExperiment}}).
 #' @param assay a string or integer specifying which assay contains the count
 #'   data (default = 1). Ignored if \code{object} is a matrix.
 #' @param fam a string specifying the model type to be used for calculating the
@@ -177,60 +180,78 @@
 #' @param batch an optional factor indicating batch membership of observations.
 #'   If provided, the null model is computed within each batch separately to
 #'   regress out the batch effect from the resulting residuals.
-#'  
+#'
 #' @return The original \code{SingleCellExperiment} or
 #'   \code{SummarizedExperiment} object with the residuals appended as a new
 #'   assay. The assay name will be fam_type_residuals (eg,
 #'   binomial_deviance_residuals). If the input was a matrix, output is a dense
 #'   matrix containing the residuals.
-#'  
+#'
 #' @details This function should be used only on the un-normalized counts.
-#'  It was originally designed for single-cell RNA-seq counts 
-#'  obtained by the use of unique molecular identifiers (UMIs) and has not been 
+#'  It was originally designed for single-cell RNA-seq counts
+#'  obtained by the use of unique molecular identifiers (UMIs) and has not been
 #'  tested on read count data without UMIs or other data types.
-#'  
-#'  Note that even though sparse Matrix objects are accepted as input, 
-#'  they are internally coerced to dense matrix before processing, 
+#'
+#'  Note that even though sparse Matrix objects are accepted as input,
+#'  they are internally coerced to dense matrix before processing,
 #'  because the output
-#'  is always a dense matrix since the residuals transformation 
+#'  is always a dense matrix since the residuals transformation
 #'  is not sparsity preserving.
 #'  To avoid memory issues, it is recommended to perform feature selection first
-#'  and subset the number of features to a smaller size prior to computing the 
+#'  and subset the number of features to a smaller size prior to computing the
 #'  residuals.
-#'  
+#'
 #' @references Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019). Feature
 #' Selection and Dimension Reduction for Single Cell RNA-Seq based on a
 #' Multinomial Model. \emph{Genome Biology}
 #' \url{https://doi.org/10.1186/s13059-019-1861-6}
-#' 
+#'
 #' @examples
 #' ncells <- 100
 #' u <- matrix(rpois(20000, 5), ncol=ncells)
 #' sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 #' nullResiduals(sce)
-#' 
+#'
 #' @importFrom SummarizedExperiment assay
-#' @importFrom SummarizedExperiment assay<- 
+#' @importFrom SummarizedExperiment assay<-
 #' @export
-setMethod(f = "nullResiduals", 
-          signature = signature(object = "SummarizedExperiment"), 
-          definition = function(object, assay = 1,
-                                fam = c("binomial", "poisson"), 
-                                type = c("deviance", "pearson"), 
+setMethod(f = "nullResiduals",
+          signature = signature(object = "SummarizedExperiment"),
+          definition = function(object, assay = "counts",
+                                fam = c("binomial", "poisson"),
+                                type = c("deviance", "pearson"),
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              m <- as.matrix(assay(object, assay))
+              # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
-              assay(object, name) <- .null_residuals_batch(m, fam, type, batch)
+              assay(object, name) <- .null_residuals_batch(assay(object, assay), fam, type, batch)
               object
           })
 
 #' @rdname nullResiduals
 #' @export
-setMethod(f = "nullResiduals", 
-          signature = signature(object = "matrix"), 
-          definition = function(object, fam = c("binomial", "poisson"), 
-                                type = c("deviance", "pearson"), 
+setMethod(f = "nullResiduals",
+          signature = signature(object = "SingleCellExperiment"),
+          definition = function(object, assay = "counts",
+                                fam = c("binomial", "poisson"),
+                                type = c("deviance", "pearson"),
+                                batch = NULL){
+              fam <- match.arg(fam); type <- match.arg(type)
+              # m <- as.matrix(assay(object, assay))
+              name <- paste(fam, type, "residuals", sep="_")
+              tmp <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(object))
+              rownames(tmp) <- rownames(object)
+              colnames(tmp) <- colnames(object)
+              assay(object, name) <- tmp
+              object
+          })
+
+#' @rdname nullResiduals
+#' @export
+setMethod(f = "nullResiduals",
+          signature = signature(object = "matrix"),
+          definition = function(object, fam = c("binomial", "poisson"),
+                                type = c("deviance", "pearson"),
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
               .null_residuals_batch(object, fam, type, batch)
@@ -238,10 +259,10 @@ setMethod(f = "nullResiduals",
 
 #' @rdname nullResiduals
 #' @export
-setMethod(f = "nullResiduals", 
-          signature = signature(object = "Matrix"), 
-          definition = function(object, fam = c("binomial", "poisson"), 
-                                type = c("deviance", "pearson"), 
+setMethod(f = "nullResiduals",
+          signature = signature(object = "Matrix"),
+          definition = function(object, fam = c("binomial", "poisson"),
+                                type = c("deviance", "pearson"),
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
 
