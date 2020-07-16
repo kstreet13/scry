@@ -4,79 +4,29 @@
 \alias{GLMPCA}
 \alias{GLMPCA,SummarizedExperiment-method}
 \alias{GLMPCA,matrix-method}
+\alias{GLMPCA,Matrix-method}
 \title{Generalized principal components analysis for non-normally distributed
   data}
 \usage{
 GLMPCA(object, ...)
 
-\S4method{GLMPCA}{SummarizedExperiment}(
-  object,
-  assay = 1,
-  L,
-  fam = c("poi", "nb", "mult", "bern"),
-  ctl = list(maxIter = 1000, eps = 1e-04),
-  penalty = 1,
-  verbose = FALSE,
-  init = list(factors = NULL, loadings = NULL),
-  nb_theta = 1,
-  X = NULL,
-  Z = NULL,
-  sz = NULL
-)
+\S4method{GLMPCA}{SummarizedExperiment}(object, assay = 1, L, ...)
 
-\S4method{GLMPCA}{matrix}(
-  object,
-  assay = 1,
-  L,
-  fam = c("poi", "nb", "mult", "bern"),
-  ctl = list(maxIter = 1000, eps = 1e-04),
-  penalty = 1,
-  verbose = FALSE,
-  init = list(factors = NULL, loadings = NULL),
-  nb_theta = 1,
-  X = NULL,
-  Z = NULL,
-  sz = NULL
-)
+\S4method{GLMPCA}{matrix}(object, assay = 1, L, ...)
+
+\S4method{GLMPCA}{Matrix}(object, assay = 1, L, ...)
 }
 \arguments{
 \item{object}{A \code{\link{SingleCellExperiment}} or
 \link{SummarizedExperiment} object. Alternatively, a matrix of integer
 counts.}
 
-\item{...}{for the generic, additional arguments to pass to object-specific
-methods.}
+\item{...}{further arguments passed to \code{\link[glmpca]{glmpca}}}
 
 \item{assay}{a character or integer specifying which assay to use for GLM-PCA
 (default = 1). Ignored if \code{object} is a matrix.}
 
 \item{L}{the desired number of latent dimensions (integer).}
-
-\item{fam}{character describing the likelihood to use for the data
-(poisson, negative binomial, binomial approximation to multinomial,
-bernoulli).}
-
-\item{ctl}{a list of control parameters for optimization.}
-
-\item{penalty}{the L2 penalty for the latent factors (default = 1).
-Regression coefficients are not penalized.}
-
-\item{verbose}{logical value indicating whether the current deviance should
-be printed after each iteration (default = FALSE).}
-
-\item{init}{a list containing initial estimates for the factors (\code{U})
-and loadings (\code{V}) matrices.}
-
-\item{nb_theta}{see \code{\link[MASS]{negative.binomial}} (nb_theta -> infty
-= Poisson).}
-
-\item{X}{a matrix of column (observations) covariates. Any column with all
-same values (eg. 1 for intercept) will be removed. This is because we force
-the intercept and want to avoid collinearity.}
-
-\item{Z}{a matrix of row (feature) covariates, usually not needed.}
-
-\item{sz}{numeric vector of size factors to use in place of total counts.}
 }
 \value{
 The original \code{SingleCellExperiment} or
@@ -91,11 +41,6 @@ The original \code{SingleCellExperiment} or
 This function implements the GLM-PCA dimensionality reduction
   method for high-dimensional count data. This is a wrapper for
   \code{\link[glmpca]{glmpca}}.
-}
-\details{
-The basic model is \code{R = AX\'+ZG\'+VU\'}, where \code{E\[Y\] = M
-  = linkinv(R)}. Regression coefficients are \code{A} and \code{G}, latent
-  factors are \code{U} and loadings are \code{V}.
 }
 \examples{
 ncells <- 100
