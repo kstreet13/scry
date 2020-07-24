@@ -15,16 +15,24 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Make sure you have latest version (needs glmpca >= 0.2.0)
+```{r, eval=FALSE}
+devtools::install_github("willtownes/glmpca")
+```
+
+
 ```{r}
-suppressPackageStartupMessages(library(SingleCellExperiment))
-library(DelayedArray)
-library(BiocSingular)
-require(scry)
+suppressPackageStartupMessages({
+  library(SingleCellExperiment)
+  library(DelayedArray)
+  library(BiocSingular)
+  require(scry)
+})
 ```
 
 # Overview
 
-For large datasets, it may be advantageous to keep the original data in a on-disk HDF5 file and avoid loading the full data in memory.
+For large data sets, it may be advantageous to keep the original data in a on-disk HDF5 file and avoid loading the full data in memory.
 
 This is a vignette to benchmark how `scry` performs with in-memory data vs matrix-like objects from [`DelayedArray`](https://bioconductor.org/packages/DelayedArray) Bioconductor package (`DelayedMatrix`, `HDF5Matrix`). 
 
@@ -36,7 +44,7 @@ To get started, we will work with the `TENxBrainData` ExperimentHub data package
 library(TENxBrainData)
 tenx <- TENxBrainData()
 
-tenx <- tenx[,1:100] # start with a small subset for testing while building benchmark code
+tenx <- tenx[,1:1000] # start with a small subset for testing while building benchmark code
 ```
 
 # Benchmark
@@ -51,8 +59,8 @@ dim(tenx_realized)
 
 Next, confirm that the sizes are very different: 
 ```{r}
-pryr::object_size(tenx) # 4.44 MB
-pryr::object_size(tenx_realized) # 15.6 MB
+pryr::object_size(tenx) # 4.62 MB
+pryr::object_size(tenx_realized) # 117 MB
 ```
 
 Yep, they are different. OK let's apply the various options: 
@@ -62,37 +70,23 @@ Here, we run the in-memory, vectorized `nullResiduals()` function:
 ```{r}
 time_start <- proc.time()
 tenx_realized <- nullResiduals(tenx_realized, assay="counts", type="deviance")
+pcs.out <- runPCA(assay(tenx_realized, "poisson_deviance_residuals"), 
+                  rank=10, BSPARAM=ExactParam())
 time_end <- proc.time()
 time_inmem_vec <- time_end - time_start
 time_inmem_vec
-# > time_inmem_vec
-#    user  system elapsed
-#   0.874   0.216   1.094
 ```
 
-Next, we try the `DelayedArray`, vectorized `nullResiduals()` function: 
+Next, we try the `nullResiduals()` function using on-disk data (`DelayedArray`). 
+The `nullResiduals()` function that uses `BiocSingular::LowRankMatrix`. 
 ```{r}
 time_start <- proc.time()
-tenx_vec <- nullResiduals(tenx, assay="counts", type="deviance")
-pcs.out <- runPCA(assay(tenx_vec, "binomial_deviance_residuals"), 
+tmp <- nullResiduals(tenx, assay="counts", fam = "poisson", type="deviance")
+pcs.out <- runPCA(assay(tmp, "poisson_deviance_residuals"), 
                   rank=10, BSPARAM=ExactParam())
 time_end <- proc.time()
-time_da_vec <- time_end - time_start
-
-str(pcs.out)
-```
-
-Next, we try the `DelayedArray`, the `nullResiduals()` function that uses 
-`BiocSingular::LowRankMatrix`: 
-
-**note** once Kelly updates the `nullResiduals()` function, the `.null_poisson_deviance_residuals_delayed()` function will not exist and the code below will need to be updated. 
-
-```{r}
-time_start <- proc.time()
-tmp <- .null_poisson_deviance_residuals_delayed(assay(tenx, "counts"))
-pcs.out <- runPCA(tmp, rank=10, BSPARAM=ExactParam())
-time_end <- proc.time()
 time_da_lrm <- time_end - time_start
+time_da_lrm
 
 str(pcs.out)
 ```
@@ -100,7 +94,13 @@ str(pcs.out)
 Compare the times 
 ```{r}
 time_inmem_vec
-time_da_vec
 time_da_lrm
+# > time_inmem_vec
+#    user  system elapsed 
+#   9.012   1.962  10.983 
+# > time_da_lrm
+#    user  system elapsed 
+# 134.557   3.419 138.065 
 ```
+
 
