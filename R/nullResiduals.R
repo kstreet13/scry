@@ -6,9 +6,6 @@
         if(length(p) == nrow(X)){
             #p is a vector, length must match nrow(X)
             mu <- outer(p, n)
-        } else if(!is.null(dim(p)) && all(dim(p) == dim(X))){
-            # p is matrix, must have same dims as X
-            mu <- t(t(p)*n)
         } else {
             stop("dimensions of p and X must match!")
         }
@@ -105,38 +102,6 @@
             res[is.na(res)] <- 0 #case of 0/0
             return(res)
         }
-    } #end general Poisson block
-}
-
-
-.null_residuals_delayed <- function(m, fam = c("binomial", "poisson"),
-                                    type = c("deviance", "pearson"),
-                                    size_factors=NULL){
-    #m is a DelayedMatrix or HDF5Matrix
-    fam <- match.arg(fam); type <- match.arg(type)
-    if(is.null(size_factors)) {
-        sz <- compute_size_factors(m)
-    } else {
-        sz <- size_factors
-    }
-
-    if(fam=="poisson"){
-        lsz <- log(DelayedArray::colSums(m))
-        # make geometric mean of sz be 1 for poisson
-        sz <- exp(lsz-mean(lsz))
-    }
-
-    if(fam == "poisson") {
-        lambdahat <- DelayedArray::rowSums(m) / sum(sz)
-        if(type == "deviance"){
-            mhat <- BiocSingular::LowRankMatrix(DelayedArray(matrix(lambdahat)),
-                                                t(DelayedArray(matrix(sz, nrow = 1))))
-            rfunc <- .poisson_deviance_residuals(x=m, xhat=mhat)
-        }
-        #up to this point no dense objects created in memory,
-        #modify below line
-        #to write each row to a disk based delayedArray
-        return(t(vapply(seq_len(nrow(m)),rfunc,FUN.VALUE=0.0*sz)))
     } #end general Poisson block
 }
 
