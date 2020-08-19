@@ -16,7 +16,9 @@
         #this next line would only matter if all counts
         #were from a single gene, so not checking saves time.
         # term2[is.na(term2)] <- 0
-        return(sign(X-mu)*sqrt(2*(term1+term2)))
+        res <- sign(X-mu)*sqrt(2*(term1+term2))
+        res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
+        return(res)
     } else { #X is a sparse Matrix or delayed Array
         stopifnot(length(p) == nrow(X))
         if(length(p) == nrow(X)){ 
@@ -39,7 +41,9 @@
         #this next line would only matter if all counts
         #were from a single gene, so not checking saves time.
         term2[is.na(term2)] <- 0 
-        return(sign(X-mu)*sqrt(2*(term1+term2)))
+        res <- sign(X-mu)*sqrt(2*(term1+term2))
+        res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
+        return(res)
     }
 }
 
