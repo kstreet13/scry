@@ -1,38 +1,84 @@
-# Helper functions for devianceFeatureSelection
-.poisson_deviance<-function(x,mu,sz){
-    #assumes log link and size factor sz on the same scale as x (not logged)
-    #stopifnot(all(x>=0 & sz>0))
-    2*sum(x*log(x/(sz*mu)),na.rm=TRUE)-2*sum(x-sz*mu)
+#compute deviance for each gene (row) in a matrix-like object...
+#...or SummarizedExperiment
+
+#' @importFrom methods as
+#' @importFrom Matrix colSums
+sparseBinomialDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    X<-as(X,"CsparseMatrix")
+    LP<-L1P<-X/sz #recycling
+    LP@x<-log(LP@x) #log transform nonzero elements only
+    L1P@x<-log1p(-L1P@x) #rare case: -Inf if only a single gene nonzero in a cell
+    ll_sat<-Matrix::colSums(X*(LP-L1P)+sz*L1P, na.rm=TRUE)
+    sz_sum<-sum(sz)
+    feature_sums<-Matrix::colSums(X)
+    p<-feature_sums/sz_sum
+    l1p<-log1p(-p)
+    ll_null<-feature_sums*(log(p)-l1p)+sz_sum*l1p
+    2*(ll_sat-ll_null)
 }
 
-.binomial_deviance<-function(x,p,n){
-    term1<-sum(x*log(x/(n*p)), na.rm=TRUE)
-    nx<-n-x
-    term2<-sum(nx*log(nx/(n*(1-p))), na.rm=TRUE)
-    2*(term1+term2)
+# NOTE- may want to import 'colSums' from DelayedArray
+denseBinomialDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    P<-X/sz
+    L1P<-log1p(-P)
+    ll_sat<-colSums(X*(log(P)-L1P)+sz*L1P, na.rm=TRUE)
+    sz_sum<-sum(sz)
+    feature_sums<-colSums(X)
+    p<-feature_sums/sz_sum
+    l1p<-log1p(-p)
+    ll_null<-feature_sums*(log(p)-l1p)+sz_sum*l1p
+    2*(ll_sat-ll_null)
+}
+
+#' @importFrom methods as
+#' @importFrom Matrix colSums
+sparsePoissonDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    X<-as(X,"CsparseMatrix")
+    LP<-X/sz #recycling
+    LP@x<-log(LP@x) #log transform nonzero elements only
+    ll_sat<-Matrix::colSums(X*LP, na.rm=TRUE)
+    feature_sums<-Matrix::colSums(X)
+    ll_null<-feature_sums*log(feature_sums/sum(sz))
+    2*(ll_sat-ll_null)
+}
+
+# NOTE- may want to import 'colSums' from DelayedArray
+densePoissonDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    ll_sat<-colSums(X*log(X/sz), na.rm=TRUE)
+    feature_sums<-colSums(X)
+    ll_null<-feature_sums*log(feature_sums/sum(sz))
+    2*(ll_sat-ll_null)
 }
 
 #' @importFrom Matrix t
+#' @importFrom methods is
 .compute_deviance<-function(m,fam=c("binomial","poisson")){
+    #m is either a Matrix or matrix object (later: support DelayedArrays)
     #m a data matrix with genes=rows
     fam<-match.arg(fam)
     sz<-compute_size_factors(m,fam)
-    sz_sum<-sum(sz)
+    # sz_sum<-sum(sz)
     m<-Matrix::t(m) #column slicing faster than row slicing for matrix in R.
     #note: genes are now in the COLUMNS of m
-    dev_binom<-function(g){
-        x<-m[,g]
-        .binomial_deviance(x,sum(x)/sz_sum,sz)
+    if(is(m,"sparseMatrix")){
+        if(fam=="binomial"){
+            return(sparseBinomialDeviance(m,sz))
+        } else { #fam=="poisson"
+            return(sparsePoissonDeviance(m,sz))
+        }
+    #} else if(is(m,"DelayedArray")){ # TO DO!
+    } else { #m is a dense array in memory. Also includes non-sparse Matrix objects like dgeMatrix
+        m<-as.matrix(m)
+        if(fam=="binomial"){
+            return(denseBinomialDeviance(m,sz))
+        } else { #fam=="poisson"
+            return(densePoissonDeviance(m,sz))
+        }
     }
-    dev_poi<-function(g){
-        x<-m[,g]
-        .poisson_deviance(x,sum(x)/sz_sum,sz)
-    }
-    dev<-if(fam=="binomial"){ dev_binom } else { dev_poi }
-    #we can't just use apply() b/c it will coerce a sparse Matrix to dense.
-    #note: would be possible to parallelize over cols of m here
-    #computation for each gene is independent. Future enhancement?
-    vapply(seq_len(ncol(m)),dev,FUN.VALUE=0.0) #numeric vector
 }
 
 .compute_deviance_batch<-function(m,fam=c("binomial","poisson"),batch=NULL){
