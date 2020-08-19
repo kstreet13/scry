@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.com/kstreet13/scry.svg?token=o1x5ZKVR5sA6MpqhDnQX&branch=master)](https://travis-ci.com/kstreet13/scry)
 [![codecov](https://codecov.io/gh/kstreet13/scry/branch/master/graph/badge.svg?token=2QCzltvkbJ)](https://codecov.io/gh/kstreet13/scry)
 
+<img src=inst/scry_sticker.png height="200">
+
 The released version of scry can be found on Bioconductor at https://bioconductor.org/packages/scry.
 
 A collection of methods for the analysis of small-count data, such as single-cell RNA-seq.
