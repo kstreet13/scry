@@ -46,7 +46,7 @@ in-memory Matrix format
 
 ```{r}
 mean(denseCounts>0) #shows that the data are mostly zeros so sparsity useful
-sparseCounts<-Matrix(denseCounts,sparse=TRUE)
+sparseCounts<-Matrix::Matrix(denseCounts,sparse=TRUE)
 system.time(sparseDevs<-devianceFeatureSelection(sparseCounts)) #1.6 sec
 max(abs(sparseDevs-h5devs)) #should be close to zero
 ```
