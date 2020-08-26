@@ -15,7 +15,7 @@ test_that("featureSelection works", {
     se <- SummarizedExperiment(assays=list(logcounts=v,counts=u))
     sce <- SingleCellExperiment(assays=list(logcounts=v,counts=u,
                                             sparse_counts=m))
-    h5<-as(m,"HDF5Matrix") #depends on package HDF5Matrix
+    h5<-as(u,"HDF5Matrix") #depends on package HDF5Matrix
 
     #check no error with different object types
     outU<-devianceFeatureSelection(u)
