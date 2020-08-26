@@ -24,14 +24,14 @@ devianceFeatureSelection(object, ...)
 }
 \arguments{
 \item{object}{an object inheriting from \link{SummarizedExperiment} (such as
-\code{\link{SingleCellExperiment}}). Alternatively, a matrix or sparse
-Matrix of integer counts.}
+\code{\link{SingleCellExperiment}}). Alternatively, a matrix or matrix-like
+object (such as a sparse Matrix) of non-negative integer counts.}
 
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
 
 \item{assay}{a string or integer specifying which assay contains the count
-data (default = 1). Ignored if \code{object} is a matrix or sparse Matrix.}
+data (default = 1). Ignored if \code{object} is a matrix-like object.}
 
 \item{fam}{a string specifying the model type to be used for calculating the
 residuals. Binomial (the default) is the closest approximation to
@@ -44,19 +44,18 @@ regress out the batch effect from the resulting deviance statistics.}
 
 \item{nkeep}{integer, how many informative features should be retained?
 Default: all features are retained if set to NULL. Ignored if \code{object}
-is a matrix or sparse Matrix.}
+is a matrix-like object.}
 
 \item{sorted}{logical, should the \code{object} be returned with rows sorted
 in decreasing order of deviance? Default: FALSE, unless nkeep is specified,
-in which case it is forced to be TRUE. Ignored for matrix and sparse Matrix
-inputs.}
+in which case it is forced to be TRUE. Ignored for matrix-like inputs.}
 }
 \value{
 The original \code{SingleCellExperiment} or
   \code{SummarizedExperiment} object with the deviance statistics for each
   feature appended to the rowData. The new column name will be either
-  binomial_deviance or poisson_deviance. If the input was a matrix or sparse
-  Matrix, output is a numeric vector containing the deviance statistics for
+  binomial_deviance or poisson_deviance. If the input was a matrix-like 
+  object, output is a numeric vector containing the deviance statistics for
   each row.
 }
 \description{
