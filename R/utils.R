@@ -3,7 +3,8 @@
 #' @description Computes a size factor for each observation (column) of a 
 #'   count data matrix based on an approximate multinomial model.
 #' 
-#' @param m a matrix or sparse \code{\link{Matrix}} of integer count values.
+#' @param m a matrix-like object (such as sparse \code{\link{Matrix}} or
+#'   \code{\link{DelayedArray}}) of integer count values.
 #' @param fam a string specifying the model type to be used for calculating
 #'   size factors. Must be either 'binomial' or 'poisson'.
 #' 
@@ -20,13 +21,12 @@
 #' u <- matrix(rpois(20000, 5), ncol=ncells)
 #' compute_size_factors(u)
 #' 
-#' @importFrom Matrix colSums
 #' @export
 compute_size_factors<-function(m,fam=c("binomial","poisson")){
     #given matrix m with samples in the columns
     #compute size factors suitable for the discrete model in 'fam'
     fam<-match.arg(fam)
-    sz<-Matrix::colSums(m) #base case: binomial
+    sz<-DelayedArray::colSums(m) #base case: binomial
     if(fam=="binomial"){ return(sz) }
     #else, Poisson
     lsz<-log(sz)

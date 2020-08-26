@@ -1,4 +1,5 @@
 context("Test deviance feature selection")
+require(SingleCellExperiment)
 set.seed(1234)
 
 test_that("featureSelection works", {
@@ -10,24 +11,25 @@ test_that("featureSelection works", {
     u[de_genes,1:30]<-3*u[de_genes,1:30]
     u[de_genes,31:60]<-round(.5*u[de_genes,31:60])
     v <- log2(u + 1)
-    require(Matrix)
-    m <- Matrix(u)
-    require(SingleCellExperiment)
+    m <- Matrix::Matrix(u,sparse=TRUE)
     se <- SummarizedExperiment(assays=list(logcounts=v,counts=u))
-    sce <- SingleCellExperiment(assays=list(logcounts=v,counts=u,sparse_counts=m))
-    
+    sce <- SingleCellExperiment(assays=list(logcounts=v,counts=u,
+                                            sparse_counts=m))
+    h5<-as(m,"HDF5Matrix") #depends on package HDF5Matrix
+
     #check no error with different object types
     outU<-devianceFeatureSelection(u)
     expect_is(outU,"numeric")
     #all DE genes should have higher deviance than non-DE genes.
     expect_gt(min(outU[de_genes]), max(outU[-de_genes]))
     outM<-devianceFeatureSelection(m)
-    
+    outH5<-devianceFeatureSelection(h5)
     outSE<-devianceFeatureSelection(se,assay="counts")
     expect_is(outSE,"SummarizedExperiment")
     
     #check all object inputs give same output
     expect_equivalent(outM,outU)
+    expect_equivalent(outH5,outU)
     expect_equivalent(rowData(outSE)[,"binomial_deviance"], outU)
     
     #check different input parameters don't throw errors

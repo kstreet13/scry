@@ -22,18 +22,21 @@ Depends:
     stats,
     methods
 Imports:
+    DelayedArray,
     glmpca (>= 0.2.0),
+    HDF5Array,
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment
 Suggests:
     BiocGenerics,
-    knitr,
-    testthat,
     covr,
-    rmarkdown,
+    DuoClustering2018,
     ggplot2,
-    DuoClustering2018
+    knitr,
+    rmarkdown,
+    TENxPBMCData,
+    testthat
 VignetteBuilder: knitr
 LazyData: false
 URL: https://bioconductor.org/packages/scry.html
