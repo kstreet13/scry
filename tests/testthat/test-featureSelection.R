@@ -1,5 +1,5 @@
 context("Test deviance feature selection")
-require(SingleCellExperiment)
+library(SingleCellExperiment)
 set.seed(1234)
 
 test_that("featureSelection works", {
@@ -15,7 +15,7 @@ test_that("featureSelection works", {
     se <- SummarizedExperiment(assays=list(logcounts=v,counts=u))
     sce <- SingleCellExperiment(assays=list(logcounts=v,counts=u,
                                             sparse_counts=m))
-    h5<-as(u,"HDF5Matrix") #depends on package HDF5Matrix
+    h5<-HDF5Array::writeHDF5Array(u)
 
     #check no error with different object types
     outU<-devianceFeatureSelection(u)
