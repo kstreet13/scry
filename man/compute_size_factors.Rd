@@ -7,7 +7,8 @@
 compute_size_factors(m, fam = c("binomial", "poisson"))
 }
 \arguments{
-\item{m}{a matrix or sparse \code{\link{Matrix}} of integer count values.}
+\item{m}{a matrix-like object (such as sparse \code{\link{Matrix}} or
+\code{\link{DelayedArray}}) of integer count values.}
 
 \item{fam}{a string specifying the model type to be used for calculating
 size factors. Must be either 'binomial' or 'poisson'.}

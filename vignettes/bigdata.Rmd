@@ -1,0 +1,57 @@
+---
+title: "Scry Methods For Larger Datasets"
+author: "Will Townes"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  BiocStyle::html_document:
+    toc: false
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Scry Methods For Larger Datasets}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r}
+suppressPackageStartupMessages(library(TENxPBMCData))
+require(scry)
+```
+
+We illustrate the application of scry methods to disk-based data from the 
+TENxPBMCData package. Each dataset in this package is stored in an HDF5 file
+that is accessed through a DelayedArray interface. This avoids the need to 
+load the entire dataset into memory for analysis.
+
+## Feature Selection with Deviance
+
+```{r}
+sce<-TENxPBMCData(dataset="pbmc3k")
+h5counts<-counts(sce)
+seed(h5counts) #print information about object
+h5counts<-h5counts[rowSums(h5counts)>0,]
+system.time(h5devs<-devianceFeatureSelection(h5counts)) # 26 sec
+```
+
+We now compare the computation speed when the same data is converted to an 
+ordinary array in-memory. Note this would not be possible with larger 
+HDF5Array objects.
+
+```{r}
+denseCounts<-as.matrix(h5counts)
+system.time(denseDevs<-devianceFeatureSelection(denseCounts)) # 5 sec
+max(abs(denseDevs-h5devs)) #should be close to zero
+```
+
+Finally we compare the speed when the counts data are stored in a sparse 
+in-memory Matrix format
+
+```{r}
+mean(denseCounts>0) #shows that the data are mostly zeros so sparsity useful
+sparseCounts<-Matrix::Matrix(denseCounts,sparse=TRUE)
+system.time(sparseDevs<-devianceFeatureSelection(sparseCounts)) #1.6 sec
+max(abs(sparseDevs-h5devs)) #should be close to zero
+```
+
+Using disk-based data saves memory but slows computation time. When the data
+contain mostly zeros, and are not too larger, the sparse in-memory Matrix 
+object achieves fastest computation times. The resulting deviance statistics 
+are the the same for all of the different data formats.

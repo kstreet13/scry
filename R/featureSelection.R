@@ -1,42 +1,88 @@
-# Helper functions for devianceFeatureSelection
-.poisson_deviance<-function(x,mu,sz){
-    #assumes log link and size factor sz on the same scale as x (not logged)
-    #stopifnot(all(x>=0 & sz>0))
-    2*sum(x*log(x/(sz*mu)),na.rm=TRUE)-2*sum(x-sz*mu)
+#compute deviance for each gene (row) in a matrix-like object...
+#...or SummarizedExperiment
+
+#' @importFrom methods as
+sparseBinomialDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    #assume X is a sparseMatrix object
+    X<-as(X,"CsparseMatrix")
+    LP<-L1P<-X/sz #recycling
+    LP@x<-log(LP@x) #log transform nonzero elements only
+    L1P@x<-log1p(-L1P@x) #rare case: -Inf if only a single gene nonzero in a cell
+    ll_sat<-Matrix::colSums(X*(LP-L1P)+sz*L1P, na.rm=TRUE)
+    sz_sum<-sum(sz)
+    feature_sums<-Matrix::colSums(X)
+    p<-feature_sums/sz_sum
+    l1p<-log1p(-p)
+    ll_null<-feature_sums*(log(p)-l1p)+sz_sum*l1p
+    2*(ll_sat-ll_null)
 }
 
-.binomial_deviance<-function(x,p,n){
-    term1<-sum(x*log(x/(n*p)), na.rm=TRUE)
-    nx<-n-x
-    term2<-sum(nx*log(nx/(n*(1-p))), na.rm=TRUE)
-    2*(term1+term2)
+denseBinomialDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    P<-X/sz
+    L1P<-log1p(-P)
+    ll_sat<-DelayedArray::colSums(X*(log(P)-L1P)+sz*L1P, na.rm=TRUE)
+    sz_sum<-sum(sz)
+    feature_sums<-DelayedArray::colSums(X)
+    p<-feature_sums/sz_sum
+    l1p<-log1p(-p)
+    ll_null<-feature_sums*(log(p)-l1p)+sz_sum*l1p
+    2*(ll_sat-ll_null)
+}
+
+#' @importFrom methods as
+sparsePoissonDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    X<-as(X,"CsparseMatrix")
+    LP<-X/sz #recycling
+    LP@x<-log(LP@x) #log transform nonzero elements only
+    ll_sat<-Matrix::colSums(X*LP, na.rm=TRUE)
+    feature_sums<-Matrix::colSums(X)
+    ll_null<-feature_sums*log(feature_sums/sum(sz))
+    2*(ll_sat-ll_null)
+}
+
+densePoissonDeviance<-function(X,sz){
+    #X has features in cols, observations in rows
+    ll_sat<-DelayedArray::colSums(X*log(X/sz), na.rm=TRUE)
+    feature_sums<-DelayedArray::colSums(X)
+    ll_null<-feature_sums*log(feature_sums/sum(sz))
+    2*(ll_sat-ll_null)
 }
 
 #' @importFrom Matrix t
+#' @importFrom methods is
 .compute_deviance<-function(m,fam=c("binomial","poisson")){
+    #m is either a Matrix or matrix object (later: support DelayedArrays)
     #m a data matrix with genes=rows
     fam<-match.arg(fam)
     sz<-compute_size_factors(m,fam)
-    sz_sum<-sum(sz)
-    m<-Matrix::t(m) #column slicing faster than row slicing for matrix in R.
+    # sz_sum<-sum(sz)
+    m<-t(m) #column slicing faster than row slicing for matrix in R.
     #note: genes are now in the COLUMNS of m
-    dev_binom<-function(g){
-        x<-m[,g]
-        .binomial_deviance(x,sum(x)/sz_sum,sz)
+    if(is(m,"sparseMatrix")){
+        if(fam=="binomial"){
+            return(sparseBinomialDeviance(m,sz))
+        } else { #fam=="poisson"
+            return(sparsePoissonDeviance(m,sz))
+        }
+    } else { #m is either 1) an ordinary dense array or matrix
+        # 2) a non-sparse Matrix object like dgeMatrix
+        # 3) a dense object like HDF5Array (on disk) or DelayedArray (in memory)
+        if(fam=="binomial"){
+            return(denseBinomialDeviance(m,sz))
+        } else { #fam=="poisson"
+            return(densePoissonDeviance(m,sz))
+        }
     }
-    dev_poi<-function(g){
-        x<-m[,g]
-        .poisson_deviance(x,sum(x)/sz_sum,sz)
-    }
-    dev<-if(fam=="binomial"){ dev_binom } else { dev_poi }
-    #we can't just use apply() b/c it will coerce a sparse Matrix to dense.
-    #note: would be possible to parallelize over cols of m here
-    #computation for each gene is independent. Future enhancement?
-    vapply(seq_len(ncol(m)),dev,FUN.VALUE=0.0) #numeric vector
 }
 
-.compute_deviance_batch<-function(m,fam=c("binomial","poisson"),batch=NULL){
+.compute_deviance_batch<-function(object,
+                                  fam=c("binomial","poisson"),
+                                  batch=NULL){
     #deviance but with batch indicator (batch=a factor)
+    m<-object; rm(object) 
     fam<-match.arg(fam)
     stopifnot(is.null(batch) || is(batch,"factor"))
     if(is.null(batch)){
@@ -62,11 +108,14 @@
 #'   informative. Uninformative, low deviance features can be discarded to speed
 #'   up downstream analyses and reduce memory footprint.
 #' 
-#' @param object an object inheriting from \link{SummarizedExperiment} (such as
-#'   \code{\link{SingleCellExperiment}}). Alternatively, a matrix or sparse
-#'   Matrix of integer counts.
+#' @param object an object inheriting from \code{\link{SummarizedExperiment}}
+#'   (such as
+#'   \code{\link{SingleCellExperiment}}). Alternatively, a matrix or matrix-like
+#'   object (such as a sparse \code{\link{Matrix}}) of non-negative integer 
+#'   counts.
 #' @param assay a string or integer specifying which assay contains the count
-#'   data (default = 1). Ignored if \code{object} is a matrix or sparse Matrix.
+#'   data (default = 'counts'). Ignored if \code{object} is a matrix-like 
+#'   object.
 #' @param fam a string specifying the model type to be used for calculating the
 #'   residuals. Binomial (the default) is the closest approximation to
 #'   multinomial, but Poisson may be faster to compute and often is very similar
@@ -76,17 +125,16 @@
 #'   regress out the batch effect from the resulting deviance statistics.
 #' @param nkeep integer, how many informative features should be retained?
 #'   Default: all features are retained if set to NULL. Ignored if \code{object}
-#'   is a matrix or sparse Matrix.
+#'   is a matrix-like object.
 #' @param sorted logical, should the \code{object} be returned with rows sorted
 #'   in decreasing order of deviance? Default: FALSE, unless nkeep is specified,
-#'   in which case it is forced to be TRUE. Ignored for matrix and sparse Matrix
-#'   inputs.
+#'   in which case it is forced to be TRUE. Ignored for matrix-like inputs.
 #'   
 #' @return The original \code{SingleCellExperiment} or
 #'   \code{SummarizedExperiment} object with the deviance statistics for each
 #'   feature appended to the rowData. The new column name will be either
-#'   binomial_deviance or poisson_deviance. If the input was a matrix or sparse
-#'   Matrix, output is a numeric vector containing the deviance statistics for
+#'   binomial_deviance or poisson_deviance. If the input was a matrix-like 
+#'   object, output is a numeric vector containing the deviance statistics for
 #'   each row.
 #'
 #' @details In a typical single-cell analysis, many of the features (genes) may
@@ -112,9 +160,8 @@
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom SummarizedExperiment rowData<-
 #' @export
-setMethod(f = "devianceFeatureSelection",
-          signature = signature(object = "SummarizedExperiment"),
-          definition = function(object, assay = 1, 
+setMethod("devianceFeatureSelection", "SummarizedExperiment",
+          definition = function(object, assay = "counts", 
                                 fam = c("binomial", "poisson"), batch = NULL, 
                                 nkeep = NULL, sorted = FALSE){
               fam<-match.arg(fam)
@@ -144,20 +191,15 @@ setMethod(f = "devianceFeatureSelection",
 
 #' @rdname devianceFeatureSelection
 #' @export
-setMethod(f = "devianceFeatureSelection",
-          signature = signature(object = "matrix"),
-          definition = function(object, fam = c("binomial", "poisson"),
-                                batch = NULL){
-              fam<-match.arg(fam)
-              .compute_deviance_batch(object,fam,batch)
-          })
+setMethod("devianceFeatureSelection", "matrix", 
+          definition=.compute_deviance_batch)
 
 #' @rdname devianceFeatureSelection
 #' @export
-setMethod(f = "devianceFeatureSelection",
-          signature = signature(object = "Matrix"),
-          definition = function(object, fam = c("binomial", "poisson"),
-                                batch = NULL){
-              fam<-match.arg(fam)
-              .compute_deviance_batch(object,fam,batch)
-          })
+setMethod("devianceFeatureSelection", "Matrix",
+          definition=.compute_deviance_batch)
+
+#' @rdname devianceFeatureSelection
+#' @export
+setMethod("devianceFeatureSelection", "DelayedArray",
+          definition=.compute_deviance_batch)

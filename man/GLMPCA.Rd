@@ -10,23 +10,23 @@
 \usage{
 GLMPCA(object, ...)
 
-\S4method{GLMPCA}{SummarizedExperiment}(object, assay = 1, L, ...)
+\S4method{GLMPCA}{SummarizedExperiment}(object, L, assay = "counts", ...)
 
-\S4method{GLMPCA}{matrix}(object, assay = 1, L, ...)
+\S4method{GLMPCA}{matrix}(object, L, ...)
 
-\S4method{GLMPCA}{Matrix}(object, assay = 1, L, ...)
+\S4method{GLMPCA}{Matrix}(object, L, ...)
 }
 \arguments{
 \item{object}{A \code{\link{SingleCellExperiment}} or
-\link{SummarizedExperiment} object. Alternatively, a matrix of integer
-counts.}
+\link{SummarizedExperiment} object. Alternatively, a matrix-like object
+of non-negative integer counts (such as a sparse \code{\link{Matrix}}).}
 
 \item{...}{further arguments passed to \code{\link[glmpca]{glmpca}}}
 
-\item{assay}{a character or integer specifying which assay to use for GLM-PCA
-(default = 1). Ignored if \code{object} is a matrix.}
-
 \item{L}{the desired number of latent dimensions (integer).}
+
+\item{assay}{a character or integer specifying which assay to use for GLM-PCA
+(default = 'counts'). Ignored if \code{object} is a matrix.}
 }
 \value{
 The original \code{SingleCellExperiment} or
