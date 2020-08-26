@@ -5,11 +5,11 @@
 #'   \code{\link[glmpca]{glmpca}}.
 #' 
 #' @param object A \code{\link{SingleCellExperiment}} or
-#'   \link{SummarizedExperiment} object. Alternatively, a matrix of integer
-#'   counts.
-#' @param assay a character or integer specifying which assay to use for GLM-PCA
-#'   (default = 1). Ignored if \code{object} is a matrix.
+#'   \link{SummarizedExperiment} object. Alternatively, a matrix-like object
+#'   of non-negative integer counts (such as a sparse \code{\link{Matrix}}).
 #' @param L the desired number of latent dimensions (integer).
+#' @param assay a character or integer specifying which assay to use for GLM-PCA
+#'   (default = 'counts'). Ignored if \code{object} is a matrix.
 #' @param ... further arguments passed to \code{\link[glmpca]{glmpca}}
 #'
 #' @return The original \code{SingleCellExperiment} or
@@ -26,14 +26,12 @@
 #' sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 #' GLMPCA(sce, L = 2)
 #' 
-#' @import glmpca
 #' @importFrom SingleCellExperiment reducedDim<-
 #' @importFrom methods is
 #' @export
-setMethod(f = "GLMPCA",
-          signature = signature(object = "SummarizedExperiment"),
-          definition = function(object, assay = 1, L, ...){
-              res <- glmpca(Y = assay(object, assay), L = L, ...)
+setMethod(f = "GLMPCA","SummarizedExperiment",
+          definition = function(object, L, assay = "counts", ...){
+              res <- glmpca::glmpca(Y = assay(object, assay), L = L, ...)
               if(is(object, 'SingleCellExperiment')){
                   reducedDim(object, "GLMPCA") <- res$factors
               }
@@ -41,20 +39,15 @@ setMethod(f = "GLMPCA",
               return(object)
           })
 
-#' @rdname GLMPCA
-#' @importFrom glmpca glmpca
-#' @export
-setMethod(f = "GLMPCA",
-          signature = signature(object = "matrix"),
-          definition = function(object, assay = 1, L, ...){
-              glmpca(Y = object, L = L, ...)
-          })
+#this function is only needed because the glmpca signature has "Y" not "object"
+glmpca_wrapper<-function(object, L, ...){
+    glmpca::glmpca(object, L, ...)
+}
 
 #' @rdname GLMPCA
-#' @importFrom glmpca glmpca
 #' @export
-setMethod(f = "GLMPCA",
-          signature = signature(object = "Matrix"),
-          definition = function(object, assay = 1, L, ...){
-              glmpca(Y = object, L = L, ...)
-          })
+setMethod(f = "GLMPCA", "matrix", definition=glmpca_wrapper)
+
+#' @rdname GLMPCA
+#' @export
+setMethod(f = "GLMPCA", "Matrix", definition=glmpca_wrapper)
