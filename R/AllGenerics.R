@@ -4,8 +4,7 @@
 #'   methods.
 #' @export
 setGeneric(
-    name = "devianceFeatureSelection",
-    signature = 'object',
+    name = "devianceFeatureSelection", 
     def = function(object, ...) {
         standardGeneric("devianceFeatureSelection")
     }
@@ -19,7 +18,6 @@ setGeneric(
 #' @export
 setGeneric(
     name = "GLMPCA",
-    signature = 'object',
     def = function(object, ...) {
         standardGeneric("GLMPCA")
     }

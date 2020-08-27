@@ -57,7 +57,7 @@ and/or clustering without needing any normalization.
 
 ```{r fig.width=6, fig.height=4}
 set.seed(101)
-sce2<-GLMPCA(sce2, assay="counts", 2)
+sce2<-GLMPCA(sce2, 2, assay="counts")
 fit<-metadata(sce2)$glmpca
 pd<-cbind(as.data.frame(colData(sce2)), fit$factors)
 ggplot(pd, aes(x=dim1, y=dim2, colour=phenoid)) + geom_point(size=.8) +

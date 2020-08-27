@@ -7,17 +7,24 @@ Description: Many modern biological datasets consist of small counts that are
             count-based feature selection and dimension reduction algorithms.
             These methods can be used to facilitate unsupervised analysis
             of any high-dimensional data such as single-cell RNA-seq.
-Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
-            role = c("aut", "cre", "cph")),
-            person("Kelly", "Street", email = "street.kelly@gmail.com", 
-            role="aut"))
+Authors@R: c(person("Kelly", "Street", email = "street.kelly@gmail.com", 
+                role = c("aut", "cre")),
+            person("F. William", "Townes", email = "will.townes@gmail.com",
+                role = c("aut",  "cph")),
+            person("Davide", "Risso", email = "risso.davide@gmail.com",
+                role = "aut"),
+            person("Stephanie", "Hicks", email = "shicks19@jhu.edu",
+                role = "aut")
+            )
 License: Artistic-2.0
 Depends:
     R (>= 4.0),
     stats,
     methods
 Imports:
+    DelayedArray,
     glmpca (>= 0.2.0),
+    HDF5Array,
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment,
@@ -25,13 +32,13 @@ Imports:
     DelayedArray
 Suggests:
     BiocGenerics,
-    knitr,
-    testthat,
     covr,
-    rmarkdown,
-    ggplot2,
     DuoClustering2018,
-    HDF5Array
+    ggplot2,
+    knitr,
+    rmarkdown,
+    TENxPBMCData,
+    testthat
 VignetteBuilder: knitr
 LazyData: false
 URL: https://bioconductor.org/packages/scry.html

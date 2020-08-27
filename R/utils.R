@@ -2,8 +2,9 @@
 #' @name compute_size_factors
 #' @description Computes a size factor for each observation (column) of a
 #'   count data matrix based on an approximate multinomial model.
-#'
-#' @param m a matrix or sparse \code{\link{Matrix}} of integer count values.
+#' 
+#' @param m a matrix-like object (such as sparse \code{\link{Matrix}} or
+#'   \code{\link{DelayedArray}}) of integer count values.
 #' @param fam a string specifying the model type to be used for calculating
 #'   size factors. Must be either 'binomial' or 'poisson'.
 #'
