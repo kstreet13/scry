@@ -198,6 +198,7 @@ setMethod(f = "nullResiduals",
           })
 
 #' @rdname nullResiduals
+#' @import SingleCellExperiment
 #' @export
 setMethod(f = "nullResiduals",
           signature = signature(object = "SingleCellExperiment"),
