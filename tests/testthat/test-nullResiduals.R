@@ -20,12 +20,12 @@ test_that("nullResiduals works", {
     expect_is(outD, 'DelayedArray')
     expect_warning({outM <- nullResiduals(m)},
                    'substantially larger than the input')
-    expect_is(outM,"matrix")
+    expect_is(outM,"Matrix")
     outSE <- nullResiduals(se,assay="counts")
     expect_true("binomial_deviance_residuals" %in% assayNames(outSE))
     
     #check all object inputs give same output
-    expect_equivalent(outM, outU)
+    expect_equivalent(as.matrix(outM), outU)
     expect_equivalent(as.matrix(outD), outU)
     expect_equivalent(assay(outSE,"binomial_deviance_residuals"),outU)
     

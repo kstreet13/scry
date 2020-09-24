@@ -2,7 +2,7 @@
 .binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
-    if(is.matrix(X) | is(X,"Matrix")){ #X is in memory
+    if(is.matrix(X) | is(X,"Matrix")){ #X is in-memory
         if(length(p) == nrow(X)){
             #p is a vector, length must match nrow(X)
             mu <- outer(p, n)
@@ -18,7 +18,7 @@
         # term2[is.na(term2)] <- 0
         res <- sign(X-mu)*sqrt(2*(term1+term2))
         res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
-        return(as.matrix(res))
+        return(res)
     } else { #X delayed Array / out-of-memory
         stopifnot(length(p) == nrow(X))
         if(length(p) == nrow(X)){ 
@@ -76,7 +76,7 @@
         } else { #pearson residuals
             # make mhat
             if(is.matrix(m) | is(m,"Matrix")){
-                mhat <- as.matrix(outer(phat, sz))
+                mhat <- outer(phat, sz)
             } else { #if m is delayed Array / out-of-memory
                 mhat <- BiocSingular::LowRankMatrix(
                     DelayedArray(matrix(phat)),
@@ -93,7 +93,7 @@
         lambda <- rowSums(m) / sum(sz)
         # make mhat
         if(is.matrix(m) | is(m,"Matrix")){ #dense data matrix
-            mhat <- as.matrix(outer(lambda, sz))
+            mhat <- outer(lambda, sz)
         } else { #case where m is delayed Array
             mhat <- BiocSingular::LowRankMatrix(
                 DelayedArray(matrix(lambda)),
@@ -191,7 +191,6 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"),
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
               assay(object, name) <- .null_residuals_batch(assay(object, assay), fam, type, batch)
               object
@@ -207,7 +206,6 @@ setMethod(f = "nullResiduals",
                                 type = c("deviance", "pearson"),
                                 batch = NULL){
               fam <- match.arg(fam); type <- match.arg(type)
-              # m <- as.matrix(assay(object, assay))
               name <- paste(fam, type, "residuals", sep="_")
               tmp <- .null_residuals_batch(assay(object, assay), fam, type, batch, sizeFactors(object))
               rownames(tmp) <- rownames(object)
@@ -240,7 +238,6 @@ setMethod(f = "nullResiduals",
                       "Note that this will result in an object substantially larger than the input.\n",
                       "In some extreme cases this could result in an out-of-memory error.\n",
                       "We recommend using HDF5Matrix for large datasets. See the vignette for an example.")
-              #.null_residuals_batch(as.matrix(object), fam, type, batch)
               .null_residuals_batch(object, fam, type, batch)
           })
 
