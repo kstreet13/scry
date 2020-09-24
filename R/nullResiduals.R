@@ -2,7 +2,7 @@
 .binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
-    if(is.matrix(X)){ #X is a dense matrix
+    if(is.matrix(X) | is(X,"Matrix")){ #X is in memory
         if(length(p) == nrow(X)){
             #p is a vector, length must match nrow(X)
             mu <- outer(p, n)
@@ -18,8 +18,8 @@
         # term2[is.na(term2)] <- 0
         res <- sign(X-mu)*sqrt(2*(term1+term2))
         res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
-        return(res)
-    } else { #X is a sparse Matrix or delayed Array
+        return(as.matrix(res))
+    } else { #X delayed Array / out-of-memory
         stopifnot(length(p) == nrow(X))
         if(length(p) == nrow(X)){ 
             #p is a vector, length must match nrow(X)
@@ -75,9 +75,9 @@
             return(.binomial_deviance_residuals(m, phat, sz))
         } else { #pearson residuals
             # make mhat
-            if(is.matrix(m)){
-                mhat <- outer(phat, sz)
-            } else { #if m is sparse Matrix or delayed Array
+            if(is.matrix(m) | is(m,"Matrix")){
+                mhat <- as.matrix(outer(phat, sz))
+            } else { #if m is delayed Array / out-of-memory
                 mhat <- BiocSingular::LowRankMatrix(
                     DelayedArray(matrix(phat)),
                     DelayedArray(matrix(sz)))
@@ -92,9 +92,9 @@
         sz <- exp(lsz-mean(lsz))
         lambda <- rowSums(m) / sum(sz)
         # make mhat
-        if(is.matrix(m)){ #dense data matrix
-            mhat <- outer(lambda, sz)
-        } else { #case where m is a sparse Matrix or delayed Array
+        if(is.matrix(m) | is(m,"Matrix")){ #dense data matrix
+            mhat <- as.matrix(outer(lambda, sz))
+        } else { #case where m is delayed Array
             mhat <- BiocSingular::LowRankMatrix(
                 DelayedArray(matrix(lambda)),
                 DelayedArray(matrix(sz)))
