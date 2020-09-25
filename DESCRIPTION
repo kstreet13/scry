@@ -28,8 +28,7 @@ Imports:
     Matrix,
     SingleCellExperiment,
     SummarizedExperiment,
-    BiocSingular,
-    DelayedArray
+    BiocSingular
 Suggests:
     BiocGenerics,
     covr,

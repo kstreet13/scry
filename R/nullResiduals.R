@@ -2,13 +2,10 @@
 .binomial_deviance_residuals <- function(X, p, n){
     #X a matrix, n is vector of length ncol(X)
     stopifnot(length(n) == ncol(X))
+    stopifnot(length(p) == nrow(X))
+    #p is a vector, length must match nrow(X)
     if(is.matrix(X) | is(X,"Matrix")){ #X is in-memory
-        if(length(p) == nrow(X)){
-            #p is a vector, length must match nrow(X)
-            mu <- outer(p, n)
-        } else {
-            stop("dimensions of p and X must match!")
-        }
+        mu <- outer(p, n)
         term1 <- X*log(X/mu)
         term1[is.na(term1)] <- 0 #0*log(0)=0
         nx <- t(n - t(X))
@@ -20,18 +17,9 @@
         res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
         return(res)
     } else { #X delayed Array / out-of-memory
-        stopifnot(length(p) == nrow(X))
-        if(length(p) == nrow(X)){ 
-            #p is a vector, length must match nrow(X)
-            mu <- BiocSingular::LowRankMatrix(
-                DelayedArray(matrix(p)),
-                DelayedArray(matrix(n)))
-        }else if(!is.null(dim(p)) && all(dim(p) == dim(X))){
-            # p is matrix, must have same dims as X
-            mu <- t(t(p)*n)
-        }else{
-            stop("dimensions of p and X must match!")
-        }
+        mu <- BiocSingular::LowRankMatrix(
+            DelayedArray(matrix(p)),
+            DelayedArray(matrix(n)))
         term1 <- X*log(X/mu)
         term1[is.na(term1)] <- 0 #0*log(0)=0
         nx <- t(n - t(X))
@@ -120,8 +108,8 @@
         stopifnot(length(batch) == ncol(m) && is(batch, "factor"))
         res <- matrix(0.0, nrow = nrow(m), ncol = ncol(m))
         for(b in levels(batch)){
-            idx <- (batch == b)
-            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type, size_factors = size_factors)
+            idx <- which(batch == b)
+            res[, idx] <- .null_residuals(m[, idx], fam = fam, type = type, size_factors = size_factors[idx])
         }
         return(res)
     }

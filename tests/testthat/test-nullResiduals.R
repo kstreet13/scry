@@ -49,6 +49,7 @@ test_that("nullResiduals works", {
     expect_true("poisson_deviance_residuals" %in% assayNames(outSCE))
     outSCE <- nullResiduals(sce, assay= 3, fam = "poisson", type = "pearson")
     expect_true("poisson_pearson_residuals" %in% assayNames(outSCE))
+    sizeFactors(sce) <- compute_size_factors(assay(sce, 'counts'))
     outSCE <- nullResiduals(sce, assay=2, fam = "binomial")
     expect_true("binomial_deviance_residuals" %in% assayNames(outSCE))
     #verify it's a dense matrix
@@ -59,4 +60,20 @@ test_that("nullResiduals works", {
                  ') is not TRUE')
     outSCE <- nullResiduals(sce, batch = factor(rep(1:2, length.out = ncol(sce))))
     expect_true("binomial_deviance_residuals" %in% assayNames(outSCE))
+    
+    # check bad input types
+    expect_error(nullResiduals(list(a = 1:5, b = letters[1:10])),
+                 'currently not supported')
+    expect_error(nullResiduals(1:20),
+                 'currently not supported')
+    # we may want to support data.frames later
+    # expect_error(nullResiduals(data.frame(a=1:5,b=2:6)),
+    #              'currently not supported')
+    
+    # hidden functions with redundancies
+    expect_error(scry:::.binomial_deviance_residuals(u, rep(.5,13), colSums(u)),
+                 ') is not TRUE')
+    expect_error(scry:::.binomial_deviance_residuals(u, rep(.5,nrow(u)), 
+                                                     rep(10,13)),
+                 ') is not TRUE')
 })
