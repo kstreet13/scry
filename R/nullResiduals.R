@@ -46,13 +46,15 @@
 }
 
 #' @importFrom Matrix rowSums
+#' @importFrom Matrix colSums
+#' @importFrom DelayedArray colSums
 .null_residuals <- function(m, fam = c("binomial", "poisson"),
                             type = c("deviance", "pearson"),
                             size_factors=NULL){
     #m is a matrix or sparse Matrix
     fam <- match.arg(fam); type <- match.arg(type)
     if(is.null(size_factors)) {
-        sz <- compute_size_factors(m)
+        sz <- colSums(m)
     } else {
         sz <- size_factors
     }
@@ -232,6 +234,7 @@ setMethod(f = "nullResiduals",
 #' @rdname nullResiduals
 #' @export
 #' @importClassesFrom DelayedArray DelayedMatrix
+#' @importFrom DelayedArray DelayedArray
 #' @importClassesFrom BiocSingular LowRankMatrix
 setMethod(f = "nullResiduals",
           signature = signature(object = "ANY"),

@@ -49,7 +49,7 @@ test_that("nullResiduals works", {
     expect_true("poisson_deviance_residuals" %in% assayNames(outSCE))
     outSCE <- nullResiduals(sce, assay= 3, fam = "poisson", type = "pearson")
     expect_true("poisson_pearson_residuals" %in% assayNames(outSCE))
-    sizeFactors(sce) <- compute_size_factors(assay(sce, 'counts'))
+    sizeFactors(sce) <- colSums(assay(sce, 'counts'))
     outSCE <- nullResiduals(sce, assay=2, fam = "binomial")
     expect_true("binomial_deviance_residuals" %in% assayNames(outSCE))
     #verify it's a dense matrix

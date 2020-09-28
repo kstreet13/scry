@@ -56,8 +56,8 @@ densePoissonDeviance<-function(X,sz){
 .compute_deviance<-function(m,fam=c("binomial","poisson")){
     #m is either a Matrix or matrix object (later: support DelayedArrays)
     #m a data matrix with genes=rows
-    fam<-match.arg(fam)
-    sz<-compute_size_factors(m)
+    fam <- match.arg(fam)
+    sz <- colSums(m)
     if(fam=="poisson"){
         lsz<-log(sz)
         #make geometric mean of sz be 1 for poisson
