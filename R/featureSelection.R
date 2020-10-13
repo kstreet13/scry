@@ -56,9 +56,13 @@ densePoissonDeviance<-function(X,sz){
 .compute_deviance<-function(m,fam=c("binomial","poisson")){
     #m is either a Matrix or matrix object (later: support DelayedArrays)
     #m a data matrix with genes=rows
-    fam<-match.arg(fam)
-    sz<-compute_size_factors(m,fam)
-    # sz_sum<-sum(sz)
+    fam <- match.arg(fam)
+    sz <- colSums(m)
+    if(fam=="poisson"){
+        lsz<-log(sz)
+        #make geometric mean of sz be 1 for poisson
+        sz <- exp(lsz-mean(lsz))
+    }
     m<-t(m) #column slicing faster than row slicing for matrix in R.
     #note: genes are now in the COLUMNS of m
     if(is(m,"sparseMatrix")){
@@ -96,7 +100,7 @@ densePoissonDeviance<-function(X,sz){
             res[,i]<-.compute_deviance(m[,batch==b],fam=fam)
         }
         #deviance is additive across subsets of observations
-        return(rowSums(res)) 
+        return(rowSums(res))
     }
 }
 
@@ -143,19 +147,19 @@ densePoissonDeviance<-function(X,sz){
 #'   an informative gene as one that is poorly fit by a multinomial model of
 #'   constant expression across cells within each batch. We compute a deviance
 #'   statistic for each gene. Genes with high deviance are more informative.
-#'   
-#' @references 
+#'
+#' @references
 #' Townes FW, Hicks SC, Aryee MJ, and Irizarry RA (2019). Feature
 #' Selection and Dimension Reduction for Single Cell RNA-Seq based on a
 #' Multinomial Model. \emph{Genome Biology}
 #' \url{https://doi.org/10.1186/s13059-019-1861-6}
-#' 
-#' @examples 
+#'
+#' @examples
 #' ncells <- 100
 #' u <- matrix(rpois(20000, 5), ncol=ncells)
 #' sce <- SingleCellExperiment::SingleCellExperiment(assays=list(counts=u))
 #' devianceFeatureSelection(sce)
-#' 
+#'
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom SummarizedExperiment rowData<-
@@ -174,15 +178,15 @@ setMethod("devianceFeatureSelection", "SummarizedExperiment",
               if(!is.null(nkeep) && nkeep>=length(dev)){
                   nkeep<-NULL
               } #user wants to keep all features
-              if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are 
+              if(!is.null(nkeep)){ sorted<-TRUE } #force sorting if we are
               # taking a subset of rows
-              if(sorted){ 
+              if(sorted){
                   o<-order(dev,decreasing=TRUE)
                   object<-object[o,]
                   if(is.null(nkeep)){ #sorting but no subsetting
-                      return(object) 
+                      return(object)
                   } else { #sorting and subsetting
-                      return(object[seq_len(nkeep),]) 
+                      return(object[seq_len(nkeep),])
                   }
               } else { #no sorting, no subsetting
                   return(object)

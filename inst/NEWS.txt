@@ -1,0 +1,12 @@
+
+Changes in Version 1.1.1 (2020-10-09)
+=====================================
+
+* `nullResiduals` and `featureSelection` can now handle DelayedArray objects
+* removed utils.R
+
+
+Changes in Version 0.1.0 (2019-11-04)
+=====================================
+
+* Package created
