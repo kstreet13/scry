@@ -52,6 +52,19 @@ max(abs(sparseDevs-h5devs)) #should be close to zero
 ```
 
 Using disk-based data saves memory but slows computation time. When the data
-contain mostly zeros, and are not too larger, the sparse in-memory Matrix 
+contain mostly zeros, and are not too large, the sparse in-memory Matrix 
 object achieves fastest computation times. The resulting deviance statistics 
-are the the same for all of the different data formats.
+are the same for all of the different data formats.
+
+## Null residuals
+
+One can run `nullResiduals` on `HDF5Matrix`, `DelayedArray` matrices, and sparse 
+matrices from the `Matrix` package with the same syntax used for the base 
+matrix case.
+
+We illustrate this with the same dataset from the `TENxPBMCData` package.
+
+```{r, eval=FALSE}
+sce <- nullResiduals(sce, assay="counts", type="deviance")
+str(sce)
+```

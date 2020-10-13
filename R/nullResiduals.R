@@ -4,35 +4,26 @@
     stopifnot(length(n) == ncol(X))
     stopifnot(length(p) == nrow(X))
     #p is a vector, length must match nrow(X)
+    nx <- t(n - t(X))
     if(is.matrix(X) | is(X,"Matrix")){ #X is in-memory
         mu <- outer(p, n)
-        term1 <- X*log(X/mu)
-        term1[is.na(term1)] <- 0 #0*log(0)=0
-        nx <- t(n - t(X))
         term2 <- nx*log(nx/outer(1-p, n))
-        #this next line would only matter if all counts
-        #were from a single gene, so not checking saves time.
-        # term2[is.na(term2)] <- 0
-        res <- sign(X-mu)*sqrt(2*(term1+term2))
-        res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
-        return(res)
     } else { #X delayed Array / out-of-memory
         mu <- BiocSingular::LowRankMatrix(
             DelayedArray(matrix(p)),
             DelayedArray(matrix(n)))
-        term1 <- X*log(X/mu)
-        term1[is.na(term1)] <- 0 #0*log(0)=0
-        nx <- t(n - t(X))
         term2 <- nx*log(nx/BiocSingular::LowRankMatrix(
             DelayedArray(matrix(1-p)),
             DelayedArray(matrix(n))))
-        #this next line would only matter if all counts
-        #were from a single gene, so not checking saves time.
-        term2[is.na(term2)] <- 0 
-        res <- sign(X-mu)*sqrt(2*(term1+term2))
-        res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
-        return(res)
-    }
+    } 
+    term1 <- X*log(X/mu)
+    term1[is.na(term1)] <- 0 #0*log(0)=0
+    #this next line would only matter if all counts
+    #were from a single gene, so not checking saves time.
+    # term2[is.na(term2)] <- 0
+    res <- sign(X-mu)*sqrt(2*(term1+term2))
+    res[is.na(res)] <- 0 # handle cases where term1+term2 = -epsilon
+    res
 }
 
 .poisson_deviance_residuals <- function(x, xhat){
@@ -130,7 +121,7 @@
 #'   defined for objects inheriting from \link{SummarizedExperiment} (such as
 #'   \code{\link{SingleCellExperiment}}).
 #' @param assay a string or integer specifying which assay contains the count
-#'   data (default = 1). Ignored if \code{object} is a matrix.
+#'   data (default = 'counts'). Ignored if \code{object} is a matrix.
 #' @param fam a string specifying the model type to be used for calculating the
 #'   residuals. Binomial (the default) is the closest approximation to
 #'   multinomial, but Poisson may be faster to compute and often is very similar

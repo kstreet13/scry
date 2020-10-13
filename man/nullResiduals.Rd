@@ -59,7 +59,7 @@ defined for objects inheriting from \link{SummarizedExperiment} (such as
 methods.}
 
 \item{assay}{a string or integer specifying which assay contains the count
-data (default = 1). Ignored if \code{object} is a matrix.}
+data (default = 'counts'). Ignored if \code{object} is a matrix.}
 
 \item{fam}{a string specifying the model type to be used for calculating the
 residuals. Binomial (the default) is the closest approximation to
