@@ -22,13 +22,14 @@ Depends:
     stats,
     methods
 Imports:
+    BiocSingular,
     DelayedArray,
     glmpca (>= 0.2.0),
     HDF5Array,
     Matrix,
+    sads,
     SingleCellExperiment,
-    SummarizedExperiment,
-    BiocSingular
+    SummarizedExperiment
 Suggests:
     BiocGenerics,
     covr,
