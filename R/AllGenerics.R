@@ -35,3 +35,27 @@ setGeneric(
         standardGeneric("nullResiduals")
     }
 )
+
+#' @title Train reference data to latent states model
+#' @rdname trainAllReference
+#' @param ... for the generic, additional arguments pass to object-specific methods.
+#' @export 
+setGeneric(name="trainAllReference",def=function(data,...) {
+  standardGeneric("trainAllReference")
+})
+
+#' @title Get probabilistic barcode for each cell-type
+#' @rdname getBarcode
+#' @export 
+setGeneric(name="getBarcode",def=function(d.list) {
+  standardGeneric("getBarcode")
+})
+
+#' @title Classify target cells
+#' @rdname classifyTarget
+#' @param ... for the generic, additional arguments pass to object-specific methods.
+#' @export 
+setGeneric(name="classifyTarget",def=function(target,...) {
+  standardGeneric("classifyTarget")
+})
+
