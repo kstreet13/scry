@@ -11,6 +11,7 @@ discrim <- rownames(pi.all)[which(gaps>=1&rowSums(pi.all)>=0.05&rowSums(pi.all)<
 
 # Helper function for training reference data
 #' @importFrom sads dpoilog
+#' @import stats
 .trainReference <- function(ref) {
   # Subset to genes present in both reference data and knowledge base
   common <- intersect(names(ref),rownames(pi.all))
@@ -179,7 +180,7 @@ setMethod("getBarcode",definition = function(d.list) {
 #' of cell-types from single cell RNA-seq data. \emph{bioRxiv}.
 #'
 #' @export
-setMethod("classifyTarget","matrix",definition = function(target,d.list,return.probs=F) {
+setMethod("classifyTarget","matrix",definition = function(target,d.list,return.probs=FALSE) {
    n <- colSums(target)
    return(.computeProbs(target,d.list,n,return.probs))
 })
@@ -187,7 +188,7 @@ setMethod("classifyTarget","matrix",definition = function(target,d.list,return.p
 #' @rdname classifyTarget
 #' @importFrom Matrix colSums  
 #' @export
-setMethod("classifyTarget","Matrix",definition = function(target,d.list,return.probs=F) {
+setMethod("classifyTarget","Matrix",definition = function(target,d.list,return.probs=FALSE) {
    n <- colSums(target)
    return(.computeProbs(target,d.list,n,return.probs))
 })
@@ -197,7 +198,7 @@ setMethod("classifyTarget","Matrix",definition = function(target,d.list,return.p
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment colData<- 
 #' @export
-setMethod("classifyTarget","SummarizedExperiment",definition = function(target,assay="counts",d.list,return.probs=F) {
+setMethod("classifyTarget","SummarizedExperiment",definition = function(target,assay="counts",d.list,return.probs=FALSE) {
   d <- assay(target,assay)
   n <- colSums(d)
   results <- .computeProbs(d,d.list,n,return.probs)
@@ -211,7 +212,8 @@ setMethod("classifyTarget","SummarizedExperiment",definition = function(target,a
 
 # Compute probabilities for classification of target cells
 #' @importFrom sads dpoilog
-.computeProbs <- function(target,d.list,n,return.probs=F) {
+#' @import stats
+.computeProbs <- function(target,d.list,n,return.probs=FALSE) {
   genes.s <- intersect(rownames(target),discrim)
   genes.s <- intersect(genes.s,rownames(d.list[[1]]))
   target <- target[genes.s,]
@@ -254,3 +256,20 @@ setMethod("classifyTarget","SummarizedExperiment",definition = function(target,a
     return(names(d.list2)[sapply(seq_len(ncol(target)),function(x) which.max(probs[x,]))]) 
   }
 }
+
+
+#' Cell type model parameters
+#'
+#' @name params_EM_81020
+#' @aliases params
+#' @docType data
+#' 
+#' @description Gene-specific parameters used for cell type prediction.
+#' 
+#' @examples 
+#' data(params_EM_81020)
+#'
+#' @references
+#' Grabski IN and Irizarry RA (2020). A probabilistic gene barcode for annotation
+#' of cell-types from single cell RNA-seq data. \emph{bioRxiv}.
+NULL
