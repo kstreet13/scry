@@ -11,7 +11,7 @@ discrim <- rownames(pi.all)[which(gaps>=1&rowSums(pi.all)>=0.05&rowSums(pi.all)<
 
 # Helper function for training reference data
 #' @importFrom sads dpoilog
-#' @import stats
+#' @importFrom stats dnbinom
 .trainReference <- function(ref) {
   # Subset to genes present in both reference data and knowledge base
   common <- intersect(names(ref),rownames(pi.all))
@@ -212,7 +212,7 @@ setMethod("classifyTarget","SummarizedExperiment",definition = function(target,a
 
 # Compute probabilities for classification of target cells
 #' @importFrom sads dpoilog
-#' @import stats
+#' @importFrom stats dnbinom
 .computeProbs <- function(target,d.list,n,return.probs=FALSE) {
   genes.s <- intersect(rownames(target),discrim)
   genes.s <- intersect(genes.s,rownames(d.list[[1]]))

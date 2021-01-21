@@ -9,11 +9,11 @@
 \usage{
 classifyTarget(target, ...)
 
-\S4method{classifyTarget}{matrix}(target, d.list, return.probs = F)
+\S4method{classifyTarget}{matrix}(target, d.list, return.probs = FALSE)
 
-\S4method{classifyTarget}{Matrix}(target, d.list, return.probs = F)
+\S4method{classifyTarget}{Matrix}(target, d.list, return.probs = FALSE)
 
-\S4method{classifyTarget}{SummarizedExperiment}(target, assay = "counts", d.list, return.probs = F)
+\S4method{classifyTarget}{SummarizedExperiment}(target, assay = "counts", d.list, return.probs = FALSE)
 }
 \arguments{
 \item{target}{an object inheriting from \code{\link{SummarizedExperiment}}
