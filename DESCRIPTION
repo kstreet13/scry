@@ -1,6 +1,6 @@
 Package: scry
 Title: Small-Count Analysis Methods for High-Dimensional Data
-Version: 1.5.2
+Version: 1.11.1
 Description: Many modern biological datasets consist of small counts that are 
             not well fit by standard linear-Gaussian methods such as principal
             component analysis. This package provides implementations of 
