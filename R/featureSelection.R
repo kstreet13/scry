@@ -10,7 +10,7 @@ sparseBinomialDeviance<-function(X,sz){
     LP<-L1P<-Matrix::Diagonal(x = 1/sz) %*% X #recycling
     LP@x<-log(LP@x) #log transform nonzero elements only
     L1P@x<-log1p(-L1P@x) #rare case: -Inf if only a single gene nonzero in a cell
-    ll_sat<-Matrix::colSums(X*(LP-L1P)+sz*L1P, na.rm=TRUE)
+    ll_sat<-Matrix::colSums(X*(LP-L1P)+Matrix::Diagonal(x = sz) %*% L1P, na.rm=TRUE)
     sz_sum<-sum(sz)
     feature_sums<-Matrix::colSums(X)
     p<-feature_sums/sz_sum
@@ -36,7 +36,7 @@ denseBinomialDeviance<-function(X,sz){
 sparsePoissonDeviance<-function(X,sz){
     #X has features in cols, observations in rows
     X<-as(X,"CsparseMatrix")
-    LP<-X/sz #recycling
+    LP<-Matrix::Diagonal(x = 1/sz) %*% X #recycling
     LP@x<-log(LP@x) #log transform nonzero elements only
     ll_sat<-Matrix::colSums(X*LP, na.rm=TRUE)
     feature_sums<-Matrix::colSums(X)
