@@ -2,11 +2,12 @@
 #...or SummarizedExperiment
 
 #' @importFrom methods as
+#' @importFrom Matrix Diagonal
 sparseBinomialDeviance<-function(X,sz){
     #X has features in cols, observations in rows
     #assume X is a sparseMatrix object
     X<-as(X,"CsparseMatrix")
-    LP<-L1P<-X/sz #recycling
+    LP<-L1P<-Matrix::Diagonal(x = 1/sz) %*% X #recycling
     LP@x<-log(LP@x) #log transform nonzero elements only
     L1P@x<-log1p(-L1P@x) #rare case: -Inf if only a single gene nonzero in a cell
     ll_sat<-Matrix::colSums(X*(LP-L1P)+sz*L1P, na.rm=TRUE)
@@ -88,7 +89,7 @@ densePoissonDeviance<-function(X,sz){
                                   fam=c("binomial","poisson"),
                                   batch=NULL){
     #deviance but with batch indicator (batch=a factor)
-    m<-object; rm(object) 
+    m<-object; rm(object)
     fam<-match.arg(fam)
     stopifnot(is.null(batch) || is(batch,"factor"))
     if(is.null(batch)){
@@ -113,14 +114,14 @@ densePoissonDeviance<-function(X,sz){
 #'   feature has a constant rate. Features with large deviance are likely to be
 #'   informative. Uninformative, low deviance features can be discarded to speed
 #'   up downstream analyses and reduce memory footprint.
-#' 
+#'
 #' @param object an object inheriting from \code{\link{SummarizedExperiment}}
 #'   (such as
 #'   \code{\link{SingleCellExperiment}}). Alternatively, a matrix or matrix-like
-#'   object (such as a sparse \code{\link{Matrix}}) of non-negative integer 
+#'   object (such as a sparse \code{\link{Matrix}}) of non-negative integer
 #'   counts.
 #' @param assay a string or integer specifying which assay contains the count
-#'   data (default = 'counts'). Ignored if \code{object} is a matrix-like 
+#'   data (default = 'counts'). Ignored if \code{object} is a matrix-like
 #'   object.
 #' @param fam a string specifying the model type to be used for calculating the
 #'   residuals. Binomial (the default) is the closest approximation to
@@ -135,11 +136,11 @@ densePoissonDeviance<-function(X,sz){
 #' @param sorted logical, should the \code{object} be returned with rows sorted
 #'   in decreasing order of deviance? Default: FALSE, unless nkeep is specified,
 #'   in which case it is forced to be TRUE. Ignored for matrix-like inputs.
-#'   
+#'
 #' @return The original \code{SingleCellExperiment} or
 #'   \code{SummarizedExperiment} object with the deviance statistics for each
 #'   feature appended to the rowData. The new column name will be either
-#'   binomial_deviance or poisson_deviance. If the input was a matrix-like 
+#'   binomial_deviance or poisson_deviance. If the input was a matrix-like
 #'   object, output is a numeric vector containing the deviance statistics for
 #'   each row.
 #'
@@ -167,8 +168,8 @@ densePoissonDeviance<-function(X,sz){
 #' @importFrom SummarizedExperiment rowData<-
 #' @export
 setMethod("devianceFeatureSelection", "SummarizedExperiment",
-          definition = function(object, assay = "counts", 
-                                fam = c("binomial", "poisson"), batch = NULL, 
+          definition = function(object, assay = "counts",
+                                fam = c("binomial", "poisson"), batch = NULL,
                                 nkeep = NULL, sorted = FALSE){
               fam<-match.arg(fam)
               m <- assay(object, assay)
@@ -197,7 +198,7 @@ setMethod("devianceFeatureSelection", "SummarizedExperiment",
 
 #' @rdname devianceFeatureSelection
 #' @export
-setMethod("devianceFeatureSelection", "matrix", 
+setMethod("devianceFeatureSelection", "matrix",
           definition=.compute_deviance_batch)
 
 #' @rdname devianceFeatureSelection
