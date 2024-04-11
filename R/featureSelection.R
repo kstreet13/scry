@@ -67,19 +67,21 @@ densePoissonDeviance<-function(X,sz){
     #note: genes are now in the COLUMNS of m
     if(is(m,"sparseMatrix")){
         if(fam=="binomial"){
-            return(sparseBinomialDeviance(m,sz))
+            out <- sparseBinomialDeviance(m,sz)
         } else { #fam=="poisson"
-            return(sparsePoissonDeviance(m,sz))
+            out <- sparsePoissonDeviance(m,sz)
         }
     } else { #m is either 1) an ordinary dense array or matrix
         # 2) a non-sparse Matrix object like dgeMatrix
         # 3) a dense object like HDF5Array (on disk) or DelayedArray (in memory)
         if(fam=="binomial"){
-            return(denseBinomialDeviance(m,sz))
+            out <- denseBinomialDeviance(m,sz)
         } else { #fam=="poisson"
-            return(densePoissonDeviance(m,sz))
+            out <- densePoissonDeviance(m,sz)
         }
     }
+    out[which(is.na(out))] <- 0
+    return(out)
 }
 
 .compute_deviance_batch<-function(object,
