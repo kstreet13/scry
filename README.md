@@ -1,7 +1,9 @@
 # scry
 
-[![Build Status](https://travis-ci.com/kstreet13/scry.svg?token=o1x5ZKVR5sA6MpqhDnQX&branch=master)](https://travis-ci.com/kstreet13/scry)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/kstreet13/scry/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/kstreet13/scry/actions)
 [![codecov](https://codecov.io/gh/kstreet13/scry/branch/master/graph/badge.svg?token=2QCzltvkbJ)](https://codecov.io/gh/kstreet13/scry)
+<!-- badges: end -->
 
 <img src=inst/scry_sticker.png height="200">
 
