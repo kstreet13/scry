@@ -29,14 +29,14 @@ devianceFeatureSelection(object, ...)
 \item{object}{an object inheriting from \code{\link{SummarizedExperiment}}
 (such as
 \code{\link{SingleCellExperiment}}). Alternatively, a matrix or matrix-like
-object (such as a sparse \code{\link{Matrix}}) of non-negative integer 
+object (such as a sparse \code{\link{Matrix}}) of non-negative integer
 counts.}
 
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
 
 \item{assay}{a string or integer specifying which assay contains the count
-data (default = 'counts'). Ignored if \code{object} is a matrix-like 
+data (default = 'counts'). Ignored if \code{object} is a matrix-like
 object.}
 
 \item{fam}{a string specifying the model type to be used for calculating the
@@ -60,7 +60,7 @@ in which case it is forced to be TRUE. Ignored for matrix-like inputs.}
 The original \code{SingleCellExperiment} or
   \code{SummarizedExperiment} object with the deviance statistics for each
   feature appended to the rowData. The new column name will be either
-  binomial_deviance or poisson_deviance. If the input was a matrix-like 
+  binomial_deviance or poisson_deviance. If the input was a matrix-like
   object, output is a numeric vector containing the deviance statistics for
   each row.
 }
