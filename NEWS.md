@@ -8,3 +8,9 @@
 * Optional adjustment for categorical batch effects for all methods.
 * Support for SingleCellExperiment and SummarizedExperiment objects
 * Support for matrix and sparse Matrix objects.
+
+# scry 1.12
+
+* changed from Travis to Github actions
+* #21 pull request from eweine to improve memory efficiency
+* now requires R 4.3
