@@ -28,3 +28,4 @@ NEWS\.md
 ^codecov\.yml$
 ^doc$
 ^Meta$
+^\.github$
