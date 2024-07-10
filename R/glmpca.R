@@ -33,7 +33,7 @@ setMethod(f = "GLMPCA","SummarizedExperiment",
           definition = function(object, L, assay = "counts", ...){
               res <- glmpca::glmpca(Y = assay(object, assay), L = L, ...)
               if(is(object, 'SingleCellExperiment')){
-                  reducedDim(object, "GLMPCA") <- res$factors
+                  reducedDim(object, "GLMPCA") <- as.matrix(res$factors)
               }
               object@metadata$glmpca <- res
               return(object)
